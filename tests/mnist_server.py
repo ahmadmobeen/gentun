@@ -49,6 +49,6 @@ if __name__ == '__main__':
             }, maximize=True, host='localhost', user='test', password='test'
         )
         csa = CrowSearchAlgorithm(flock,3)
-        csa.run(20)
+        csa.run(2)
     else:
         raise Exception("Only GA and CSA are supported")

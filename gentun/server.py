@@ -10,7 +10,7 @@ import queue
 import threading
 import time
 import uuid
-
+import ast
 from .populations import Population, Flock,GridPopulation
 
 
@@ -69,12 +69,28 @@ class RpcClient(object):
         )
         while self.response is None:
             time.sleep(3)
-        individual_attr=json.loads(parameters)
-        acc=float(self.response.decode().split(",")[1])
-        best_acc=float(self.response.decode().split(",")[2].split(']')[0])
-        if individual_attr[3]==None:
-            individual_attr[3]=0.0000
-        print(" [*] Fitness for individual {}".format(individual_attr[0])," is {:.4f}".format(acc),"on location",individual_attr[2],". Individual's bes known performance is","{:.4f}".format(best_acc),"on location",individual_attr[4])
+        id, _, fitness,last_location,best_fitness,memory,location,_=json.loads(parameters)
+
+        print("\n [*] Evaluating individual {}".format(id), "on ", location, ".")
+        print(" [*] Fitness of Crow {}".format(id), "on location", last_location," was {:.8f}".format(fitness), ".")
+        print(" [*] Best known performance of Crow {}".format(id), " is", "{:.8f}".format(best_fitness),"on location", memory)
+        client_id,client_last_location,client_acc,client_memory,client_best_acc,client_location=json.loads(self.response)
+        assert(id==client_id)
+        assert(location==client_location)
+        assert(last_location==client_last_location)
+        print(" [*] Performance of Crow {}".format(id)," is", "{:.8f}".format(client_acc), "on location", location)
+        if best_fitness == None or best_fitness < client_acc:
+            print(" [*] Updating best known performance for Crow {}".format(id), " to","{:.8f}".format(client_best_acc), "on location", client_memory)
+        else:
+            print(" [*] Best known performance for Crow {}".format(id), " remains the same ","{:.8f}".format(client_best_acc), "on location", client_memory)
+
+        # id=int(self.response.decode().split(",")[0].split("[")[1])
+        # acc=float(self.response.decode().split(",")[1])
+        # best_acc = float(self.response.decode().split(",")[3].split(']')[0])
+        # memory=ast.literal_eval("{"+self.response.decode().split("{")[1].split("}")[0]+"}")
+        # if individual_attr[3] is None:
+        #     individual_attr[3] = 0.0000
+        # print(" [*] Fitness for individual {}".format(id)," is {:.8f}".format(acc),"on location",last_location,". Individual's best known performance is","{:.8f}".format(best_acc),"on location",memory,". The new position is ",new_location)
         self.responses.put(self.response)
         # Job is completed, remove job order from queue
         self.jobs.get()
@@ -172,10 +188,9 @@ class DistributedFlock(Flock):
         jobs = queue.Queue()  # "Counter" of pending jobs, shared between threads
         responses = queue.Queue()  # Collect fitness values from workers
         for i, individual in enumerate(self.individuals):
-            # Todo: change training criteria from fitness status to explored locations.
             # if not individual.get_fitness_status():
             if individual.get_location() not in explored:
-                job_order = json.dumps([i, individual.get_space(), individual.get_location(),individual.get_best_fitness(),individual.get_memory(),individual.get_additional_parameters()])
+                job_order = json.dumps([i, individual.get_space(), individual.get_fitness(),individual.get_last_location(),individual.get_best_fitness(),individual.get_memory(),individual.get_location(),individual.get_additional_parameters()])
                 jobs.put(True)
                 client = RpcClient(jobs, responses, **self.credentials)
                 communication_thread = threading.Thread(target=client.call, args=[job_order])
@@ -188,11 +203,21 @@ class DistributedFlock(Flock):
         # Collect results and assign them to their respective individuals
         while not responses.empty():
             response = responses.get(False)
-            i, value = json.loads(response)
-            self.individuals[i].set_fitness(value)
-            if self.individuals[i].get_location() not in explored:
-                explored.append(self.individuals[i].get_location())
-                explored_fitness.append(value)
+            # id, last_location, acc, memory, best_acc, new_location =
+            client_id, client_last_location, client_acc, client_memory, client_best_acc, client_location=json.loads(response)
+            individual=self.individuals[client_id]
+            assert (individual.get_id() == client_id)
+            assert (individual.get_location() == client_location)
+            assert (individual.get_last_location() == client_last_location)
+
+            individual.set_fitness(client_acc)
+            # self.individuals[id].set_location(new_location)
+            individual.set_best_fitness(client_best_acc)
+            individual.set_memory(client_memory)
+            # self.individuals[id].set_last_location(last_location)
+            if client_location not in explored:
+                explored.append(client_location)
+                explored_fitness.append(client_acc)
 
 
 class DistributedGridPopulation(DistributedPopulation, GridPopulation):

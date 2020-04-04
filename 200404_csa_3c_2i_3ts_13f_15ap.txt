@@ -1,0 +1,67 @@
+Initializing a random flock. Size: 3
+
+0 {'S_1': '011', 'S_2': '1111000100'}
+1 {'S_1': '111', 'S_2': '1101000011'}
+2 {'S_1': '001', 'S_2': '1101101000'}
+
+Starting Crow Search Algorithm...
+
+Running iteration #1...
+
+ [*] Evaluating individual 0 on  {'S_1': '011', 'S_2': '1111000100'} .
+ [*] Fitness of Crow 0 on location {'S_1': '011', 'S_2': '1111000100'}  was 0.00000000 .
+ [*] Best known performance of Crow 0  is 0.00000000 on location {'S_1': '011', 'S_2': '1111000100'}
+ [*] Performance of Crow 0  is 0.99727997 on location {'S_1': '011', 'S_2': '1111000100'}
+ [*] Updating best known performance for Crow 0  to 0.99727997 on location {'S_1': '011', 'S_2': '1111000100'}
+
+ [*] Evaluating individual 1 on  {'S_1': '111', 'S_2': '1101000011'} .
+ [*] Fitness of Crow 1 on location {'S_1': '111', 'S_2': '1101000011'}  was 0.00000000 .
+ [*] Best known performance of Crow 1  is 0.00000000 on location {'S_1': '111', 'S_2': '1101000011'}
+ [*] Performance of Crow 1  is 0.99749003 on location {'S_1': '111', 'S_2': '1101000011'}
+ [*] Updating best known performance for Crow 1  to 0.99749003 on location {'S_1': '111', 'S_2': '1101000011'}
+
+ [*] Evaluating individual 2 on  {'S_1': '001', 'S_2': '1101101000'} .
+ [*] Fitness of Crow 2 on location {'S_1': '001', 'S_2': '1101101000'}  was 0.00000000 .
+ [*] Best known performance of Crow 2  is 0.00000000 on location {'S_1': '001', 'S_2': '1101101000'}
+ [*] Performance of Crow 2  is 0.99722004 on location {'S_1': '001', 'S_2': '1101101000'}
+ [*] Updating best known performance for Crow 2  to 0.99722004 on location {'S_1': '001', 'S_2': '1101101000'}
+
+Best performance is 0.99749003 by Crow 1 on the location : {'S_1': '111', 'S_2': '1101000011'}
+
+ [*] The Crow 0 on location {'S_1': '011', 'S_2': '1111000100'} is following the Crow 1 on location {'S_1': '111', 'S_2': '1101000011'}
+ [*] The Crow 1  is not aware of being followed by the Crow 0
+ [*] So the Crow 1  leads the Crow 0 in direction of it's best known location {'S_1': '111', 'S_2': '1101000011'}
+ [*] The flight length of Crow 0  is  3
+ [*] The Crow 0 reaches a new location  {'S_1': '100', 'S_2': '0011001101'} .
+
+ [*] The Crow 1 on location {'S_1': '111', 'S_2': '1101000011'} is following the Crow 0 on location {'S_1': '100', 'S_2': '0011001101'}
+ [*] The Crow 0  is aware of being followed by the Crow 1
+ [*] So the Crow 0  leads the Crow 1 in direction of a random location
+ [*] The Crow 1 reaches a new location  {'S_1': '111', 'S_2': '0100000011'} .
+
+ [*] The Crow 2 on location {'S_1': '001', 'S_2': '1101101000'} is following the Crow 1 on location {'S_1': '111', 'S_2': '0100000011'}
+ [*] The Crow 1  is aware of being followed by the Crow 2
+ [*] So the Crow 1  leads the Crow 2 in direction of a random location
+ [*] The Crow 2 reaches a new location  {'S_1': '001', 'S_2': '0001011010'} .
+
+Running iteration #2...
+
+ [*] Evaluating individual 0 on  {'S_1': '100', 'S_2': '0011001101'} .
+ [*] Fitness of Crow 0 on location {'S_1': '100', 'S_2': '0011001101'}  was 0.99727997 .
+ [*] Best known performance of Crow 0  is 0.99727997 on location {'S_1': '011', 'S_2': '1111000100'}
+ [*] Performance of Crow 0  is 0.99754997 on location {'S_1': '100', 'S_2': '0011001101'}
+ [*] Updating best known performance for Crow 0  to 0.99754997 on location {'S_1': '100', 'S_2': '0011001101'}
+
+ [*] Evaluating individual 1 on  {'S_1': '111', 'S_2': '0100000011'} .
+ [*] Fitness of Crow 1 on location {'S_1': '111', 'S_2': '1101000011'}  was 0.99749003 .
+ [*] Best known performance of Crow 1  is 0.99749003 on location {'S_1': '111', 'S_2': '1101000011'}
+ [*] Performance of Crow 1  is 0.99738996 on location {'S_1': '111', 'S_2': '0100000011'}
+ [*] Best known performance for Crow 1  remains the same  0.99749003 on location {'S_1': '111', 'S_2': '1101000011'}
+
+ [*] Evaluating individual 2 on  {'S_1': '001', 'S_2': '0001011010'} .
+ [*] Fitness of Crow 2 on location {'S_1': '001', 'S_2': '1101101000'}  was 0.99722004 .
+ [*] Best known performance of Crow 2  is 0.99722004 on location {'S_1': '001', 'S_2': '1101101000'}
+ [*] Performance of Crow 2  is 0.99711995 on location {'S_1': '001', 'S_2': '0001011010'}
+ [*] Best known performance for Crow 2  remains the same  0.99722004 on location {'S_1': '001', 'S_2': '1101101000'}
+
+Best performance is 0.99754997 by Crow 0 on the location : {'S_1': '100', 'S_2': '0011001101'}

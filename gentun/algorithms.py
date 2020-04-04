@@ -114,12 +114,13 @@ class CrowSearchAlgorithm(object):
         self.x_train, self.y_train = self.flock.get_data()
         self.tournament_size = tournament_size
         self.iteration = 1
-
+        self.max_iterations=0
     def get_flock_type(self):
         return self.flock.__class__
 
     def run(self, max_iterations):
-        print("Starting Crow Search Algorithm...\n")
+        print("\nStarting Crow Search Algorithm...")
+        self.max_iterations=max_iterations
         while self.iteration <= max_iterations:
             self.release_flock()
             self.iteration += 1
@@ -127,17 +128,18 @@ class CrowSearchAlgorithm(object):
     def release_flock(self):
         if self.flock.get_size() < self.tournament_size:
             raise ValueError("Flock size is smaller than tournament size.")
-        print("Running iteration #{}...".format(self.iteration))
+        print("\nRunning iteration #{}...".format(self.iteration))
         fittest = self.flock.get_fittest()
-        print("Crow with best location is:")
-        print(fittest)
-        print("Fitness value is: {}\n".format(round(fittest.get_fitness(), 4)))
+        print("\nBest performance is {:.8f} by Crow {} on the location :".format(fittest.get_best_fitness(),fittest.get_id()),fittest.get_memory())
+        # print(fittest.get_memory())
+        # print("Fitness value is: {:.8f}\n".format(fittest.get_best_fitness()))
+        if self.iteration <self.max_iterations:
+            for i,_ in enumerate(self.flock):
+                crow=self.flock[i]
+                crow.follow(self.tournament_select(crow))
 
-        for crow in self.flock:
-            crow.follow(self.tournament_select())
 
-
-    def tournament_select(self):
-        individual_list=[self.flock[i] for i in random.sample(range(self.flock.get_size()), self.tournament_size)]
-        target=max(individual_list, key=operator.methodcaller('get_fitness'))
+    def tournament_select(self,crow):
+        individual_list=[self.flock[i] for i in random.sample(range(self.flock.get_size()), self.tournament_size) if crow.get_id() !=self.flock[i].get_id()]
+        target=max(individual_list, key=operator.methodcaller('get_best_fitness'))
         return target

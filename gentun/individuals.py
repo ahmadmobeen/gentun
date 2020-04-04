@@ -290,7 +290,7 @@ class CrowIndividual(object):
     genome and a random individual generator.
     """
 
-    def __init__(self, x_train, y_train, flight_length=13,awareness_probability=0.15,space=None, location=None, memory=None,nodes=(3, 5),
+    def __init__(self, x_train, y_train, flight_length=13,awareness_probability=0.15,space=None, location=None, fitness=0,memory=None,best_fitness=0,last_location=None,id=None, nodes=(3, 5),
                  input_shape=(28, 28, 1), kernels_per_layer=(20, 50), kernel_sizes=((5, 5), (5, 5)), dense_units=500,
                  dropout_probability=0.5, classes=10, kfold=5, epochs=(3,), learning_rate=(1e-3,), batch_size=32):
 
@@ -301,7 +301,11 @@ class CrowIndividual(object):
             location = self.fly_random_location(space)
         if memory is None:
             memory=location
+        if last_location is None:
+            last_location=location
 
+        self.id=id
+        #TODO: Add id in all initializations of crows
         self.flight_length=flight_length
         self.awareness_probability=awareness_probability
         # Set individual's attributes
@@ -311,10 +315,11 @@ class CrowIndividual(object):
         self.validate_space()
         self.location = location
         self.memory=memory
+        self.last_location = last_location
         self.validate_location()
         self.validate_memory()
-        self.fitness = None  # Until evaluated an individual fitness is unknown
-        self.best_fitness = None
+        self.fitness = fitness  # Until evaluated an individual fitness is unknown
+        self.best_fitness = best_fitness
         # assert additional_parameters is None
 
         # Set additional parameters which are not tuned
@@ -353,9 +358,21 @@ class CrowIndividual(object):
         """Return individual's genes."""
         return self.location
 
+    def set_location(self,value):
+        """Return individual's genes."""
+        self.location=value
+
+    def get_last_location(self):
+        """Return individual's genes."""
+        return self.last_location
+
     def get_memory(self):
         """Return individual's genes."""
         return self.memory
+
+    def set_memory(self,value):
+        """Return individual's genes."""
+        self.memory=value
 
     def get_space(self):
         """Return individual's genome."""
@@ -371,15 +388,25 @@ class CrowIndividual(object):
 
     def evaluate_fitness(self):
         """Create model and perform cross-validation."""
+        print(" [*] Evaluating Crow {}".format(self.id),"on ",self.get_location(),".")
+        print(" [*] Fitness of Crow {}".format(self.id),"on location",self.get_last_location()," was {:.8f}".format(self.get_fitness()),".")
+        print(" [*] Best known performance of Crow {}".format(self.id)," is","{:.8f}".format(self.get_best_fitness()),"on location",self.get_memory())
+
+        #Todo: Print story line of memory update. Remove unnecessary prints on server side responce.
         model = GeneticCnnModel(
             self.x_train, self.y_train, self.location, self.nodes, self.input_shape, self.kernels_per_layer,
             self.kernel_sizes, self.dense_units, self.dropout_probability, self.classes,
             self.kfold, self.epochs, self.learning_rate, self.batch_size
         )
         self.fitness = model.cross_validate()
+        print(" [*] Performance of Crow {}".format(self.id)," is", "{:.8f}".format(self.get_fitness()), "on location", self.get_location())
         if self.best_fitness==None or self.best_fitness < self.fitness:
+            print(" [*] Updating best known performance for Crow {}".format(self.id)," to", "{:.8f}".format(self.get_fitness()), "on location", self.get_location())
             self.memory=self.location
             self.best_fitness=self.fitness
+        else:
+            print(" [*] Best known performance for Crow {}".format(self.id)," remains the same ", "{:.8f}".format(self.get_best_fitness()), "on location", self.get_memory())
+
 
         return self.fitness
 
@@ -398,6 +425,12 @@ class CrowIndividual(object):
             'batch_size': self.batch_size
         }
 
+    def get_id(self):
+        """Compute individual's fitness if necessary and return it."""
+        # if self.fitness is None:
+        #Hello
+        # self.evaluate_fitness()
+        return self.id
 
     def get_fitness(self):
         """Compute individual's fitness if necessary and return it."""
@@ -415,8 +448,13 @@ class CrowIndividual(object):
 
     def follow(self,crow):
         assert self.__class__ == crow.__class__  # Can only reproduce if they're the same species
+        print("\n [*] The Crow {}".format(self.id),"on location",self.get_location(),"is following the Crow {}".format(crow.id),"on location",crow.get_location())
+        #Todo: Print story line of crow chase
+        self.last_location=self.location
+        if (random.randint(1, 100)/100.00) < self.awareness_probability:
+            print(" [*] The Crow {}".format(crow.id), " is not aware of being followed by the Crow {}".format(self.id))
+            print(" [*] So the Crow {}".format(crow.id), " leads the Crow {}".format(self.id),"in direction of it's best known location", crow.get_memory())
 
-        if random.random() < self.awareness_probability:
             bin_xi="".join([self.get_location()[stage] for stage in self.get_location().keys()])
             bin_mj = "".join([crow.get_memory()[stage] for stage in crow.get_memory().keys()])
             diff = int(bin_mj, 2) - int(bin_xi, 2)
@@ -429,6 +467,8 @@ class CrowIndividual(object):
                     bin_diff="0"+bin_diff
 
             fl = random.randrange(0, self.flight_length, 1)
+            print(" [*] The flight length of Crow {}".format(self.id), " is ",fl)
+
             index = random.sample(range(0, 14), fl)
 
             bin_distance = ""
@@ -450,7 +490,12 @@ class CrowIndividual(object):
                 self.location[name] = bin_xiplus1[last:end]
                 last=end
         else:
+            print(" [*] The Crow {}".format(crow.id), " is aware of being followed by the Crow {}".format(self.id))
+            print(" [*] So the Crow {}".format(crow.id), " leads the Crow {}".format(self.id), "in direction of a random location")
             self.location = self.fly_random_location(self.space)
+
+        print(" [*] The Crow {}".format(self.id), "reaches a new location ",self.get_location(),".")
+
 
     def get_fitness_status(self):
         """Return True if individual's fitness in known."""
@@ -459,6 +504,10 @@ class CrowIndividual(object):
     def set_fitness(self, value):
         """Assign fitness."""
         self.fitness = value
+
+    def set_best_fitness(self, value):
+        """Assign fitness."""
+        self.best_fitness = value
 
     def copy(self):
         """Copy instance."""

@@ -87,18 +87,20 @@ class  Flock(object):
         self.species = species
         self.maximize = maximize
         if individual_list is None and size is None:
-            raise ValueError("Either pass a list of individuals or a population size for a random population.")
+            raise ValueError("Either pass a list of crows or a flock size for a random flock.\n")
         elif individual_list is None:
             if additional_parameters is None:
                 additional_parameters = {}
             self.flock_size = size
             self.individuals = [
                 self.species(
-                    self.x_train, self.y_train, flight_length,awareness_probability,input_shape=self.input_shape, classes=self.nb_classes,**additional_parameters
+                    self.x_train, self.y_train, flight_length,awareness_probability,id=i,input_shape=self.input_shape, classes=self.nb_classes,**additional_parameters
                 )
-                for _ in range(size)
+                for i in range(size)
             ]
-            print("Initializing a random population. Size: {}".format(size))
+            print("Initializing a random flock. Size: {}\n".format(size))
+            for individual in self.individuals:
+                print(individual.get_id(),individual.get_location())
         else:
             assert all([type(individual) is self.species for individual in individual_list])
             self.flock_size = len(individual_list)
@@ -117,8 +119,8 @@ class  Flock(object):
 
     def get_fittest(self):
         if self.maximize:
-            return max(self.individuals, key=operator.methodcaller('get_fitness'))
-        return min(self.individuals, key=operator.methodcaller('get_fitness'))
+            return max(self.individuals, key=operator.methodcaller('get_best_fitness'))
+        return min(self.individuals, key=operator.methodcaller('get_best_fitness'))
 
     def get_data(self):
         return self.x_train, self.y_train

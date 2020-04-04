@@ -1,0 +1,196 @@
+Initializing a random population. Size: 3
+Starting Crow Search Algorithm...
+
+Running iteration #1...
+ [*] Evaluating individual 0 on  {'S_1': '001', 'S_2': '0011010010'} .
+ [*] Fitness of Crow 0 on location {'S_1': '001', 'S_2': '0011010010'}  was 0.00000000 .
+ [*] Best known performance of Crow 0  is 0.00000000 on location {'S_1': '001', 'S_2': '0011010010'}
+ [*] Performance of Crow 0  is 0.99704996 on location {'S_1': '001', 'S_2': '0011010010'}
+ [*] Updating best known performance for Crow 0  to 0.99704996 on location {'S_1': '001', 'S_2': '0011010010'}
+ [*] Evaluating individual 1 on  {'S_1': '010', 'S_2': '0001001111'} .
+ [*] Fitness of Crow 1 on location {'S_1': '010', 'S_2': '0001001111'}  was 0.00000000 .
+ [*] Best known performance of Crow 1  is 0.00000000 on location {'S_1': '010', 'S_2': '0001001111'}
+ [*] Performance of Crow 1  is 0.99737005 on location {'S_1': '010', 'S_2': '0001001111'}
+ [*] Updating best known performance for Crow 1  to 0.99737005 on location {'S_1': '010', 'S_2': '0001001111'}
+ [*] Evaluating individual 2 on  {'S_1': '100', 'S_2': '1011001111'} .
+ [*] Fitness of Crow 2 on location {'S_1': '100', 'S_2': '1011001111'}  was 0.00000000 .
+ [*] Best known performance of Crow 2  is 0.00000000 on location {'S_1': '100', 'S_2': '1011001111'}
+ [*] Performance of Crow 2  is 0.99751998 on location {'S_1': '100', 'S_2': '1011001111'}
+ [*] Updating best known performance for Crow 2  to 0.99751998 on location {'S_1': '100', 'S_2': '1011001111'}
+Crow with best location is:
+{'S_1': '100', 'S_2': '1011001111'}
+Fitness value is: 0.9975
+
+ [*] The Crow 0 on location {'S_1': '001', 'S_2': '0011010010'} is following the Crow 2 on location {'S_1': '100', 'S_2': '1011001111'}
+ [*] The Crow 2  is aware of being followed by the Crow 0
+ [*] So the Crow 2  leads the Crow 0 in direction of a random location {'S_1': '100', 'S_2': '1011001111'}
+ [*] The Crow 0 reaches a new location  {'S_1': '000', 'S_2': '0010011001'} .
+ [*] The Crow 1 on location {'S_1': '010', 'S_2': '0001001111'} is following the Crow 2 on location {'S_1': '100', 'S_2': '1011001111'}
+ [*] The Crow 2  is aware of being followed by the Crow 1
+ [*] So the Crow 2  leads the Crow 1 in direction of a random location {'S_1': '100', 'S_2': '1011001111'}
+ [*] The Crow 1 reaches a new location  {'S_1': '010', 'S_2': '0011110111'} .
+ [*] The Crow 2 on location {'S_1': '100', 'S_2': '1011001111'} is following the Crow 2 on location {'S_1': '100', 'S_2': '1011001111'}
+ [*] The Crow 2  is aware of being followed by the Crow 2
+ [*] So the Crow 2  leads the Crow 2 in direction of a random location {'S_1': '100', 'S_2': '1011001111'}
+ [*] The Crow 2 reaches a new location  {'S_1': '111', 'S_2': '1111111011'} .
+Running iteration #2...
+ [*] Evaluating individual 0 on  {'S_1': '000', 'S_2': '0010011001'} .
+ [*] Fitness of Crow 0 on location {'S_1': '001', 'S_2': '0011010010'}  was 0.99704996 .
+ [*] Best known performance of Crow 0  is 0.99704996 on location {'S_1': '001', 'S_2': '0011010010'}
+ [*] Performance of Crow 0  is 0.99721994 on location {'S_1': '000', 'S_2': '0010011001'}
+ [*] Updating best known performance for Crow 0  to 0.99721994 on location {'S_1': '000', 'S_2': '0010011001'}
+ [*] Evaluating individual 1 on  {'S_1': '010', 'S_2': '0011110111'} .
+ [*] Fitness of Crow 1 on location {'S_1': '010', 'S_2': '0001001111'}  was 0.99737005 .
+ [*] Best known performance of Crow 1  is 0.99737005 on location {'S_1': '010', 'S_2': '0001001111'}
+ [*] Performance of Crow 1  is 0.99722994 on location {'S_1': '010', 'S_2': '0011110111'}
+ [*] Best known performance for Crow 1  remains the same  0.99737005 on location {'S_1': '010', 'S_2': '0001001111'}
+ [*] Evaluating individual 2 on  {'S_1': '111', 'S_2': '1111111011'} .
+ [*] Fitness of Crow 2 on location {'S_1': '100', 'S_2': '1011001111'}  was 0.99751998 .
+ [*] Best known performance of Crow 2  is 0.99751998 on location {'S_1': '100', 'S_2': '1011001111'}
+ [*] Performance of Crow 2  is 0.99740000 on location {'S_1': '111', 'S_2': '1111111011'}
+ [*] Best known performance for Crow 2  remains the same  0.99751998 on location {'S_1': '100', 'S_2': '1011001111'}
+Crow with best location is:
+{'S_1': '111', 'S_2': '1111111011'}
+Fitness value is: 0.9974
+
+ [*] The Crow 0 on location {'S_1': '000', 'S_2': '0010011001'} is following the Crow 2 on location {'S_1': '111', 'S_2': '1111111011'}
+ [*] The Crow 2  is aware of being followed by the Crow 0
+ [*] So the Crow 2  leads the Crow 0 in direction of a random location {'S_1': '100', 'S_2': '1011001111'}
+ [*] The Crow 0 reaches a new location  {'S_1': '100', 'S_2': '0000011000'} .
+ [*] The Crow 1 on location {'S_1': '010', 'S_2': '0011110111'} is following the Crow 2 on location {'S_1': '111', 'S_2': '1111111011'}
+ [*] The Crow 2  is aware of being followed by the Crow 1
+ [*] So the Crow 2  leads the Crow 1 in direction of a random location {'S_1': '100', 'S_2': '1011001111'}
+ [*] The Crow 1 reaches a new location  {'S_1': '100', 'S_2': '0011001111'} .
+ [*] The Crow 2 on location {'S_1': '111', 'S_2': '1111111011'} is following the Crow 2 on location {'S_1': '111', 'S_2': '1111111011'}
+ [*] The Crow 2  is aware of being followed by the Crow 2
+ [*] So the Crow 2  leads the Crow 2 in direction of a random location {'S_1': '100', 'S_2': '1011001111'}
+ [*] The Crow 2 reaches a new location  {'S_1': '101', 'S_2': '0101010100'} .
+Running iteration #3...
+ [*] Evaluating individual 0 on  {'S_1': '100', 'S_2': '0000011000'} .
+ [*] Fitness of Crow 0 on location {'S_1': '000', 'S_2': '0010011001'}  was 0.99721994 .
+ [*] Best known performance of Crow 0  is 0.99721994 on location {'S_1': '000', 'S_2': '0010011001'}
+ [*] Performance of Crow 0  is 0.99719001 on location {'S_1': '100', 'S_2': '0000011000'}
+ [*] Best known performance for Crow 0  remains the same  0.99721994 on location {'S_1': '000', 'S_2': '0010011001'}
+ [*] Evaluating individual 1 on  {'S_1': '100', 'S_2': '0011001111'} .
+ [*] Fitness of Crow 1 on location {'S_1': '010', 'S_2': '0011110111'}  was 0.99722994 .
+ [*] Best known performance of Crow 1  is 0.99737005 on location {'S_1': '010', 'S_2': '0001001111'}
+ [*] Performance of Crow 1  is 0.99707994 on location {'S_1': '100', 'S_2': '0011001111'}
+ [*] Best known performance for Crow 1  remains the same  0.99737005 on location {'S_1': '010', 'S_2': '0001001111'}
+ [*] Evaluating individual 2 on  {'S_1': '101', 'S_2': '0101010100'} .
+ [*] Fitness of Crow 2 on location {'S_1': '111', 'S_2': '1111111011'}  was 0.99740000 .
+ [*] Best known performance of Crow 2  is 0.99751998 on location {'S_1': '100', 'S_2': '1011001111'}
+ [*] Performance of Crow 2  is 0.99695000 on location {'S_1': '101', 'S_2': '0101010100'}
+ [*] Best known performance for Crow 2  remains the same  0.99751998 on location {'S_1': '100', 'S_2': '1011001111'}
+Crow with best location is:
+{'S_1': '100', 'S_2': '0000011000'}
+Fitness value is: 0.9972
+
+ [*] The Crow 0 on location {'S_1': '100', 'S_2': '0000011000'} is following the Crow 0 on location {'S_1': '100', 'S_2': '0000011000'}
+ [*] The Crow 0  is aware of being followed by the Crow 0
+ [*] So the Crow 0  leads the Crow 0 in direction of a random location {'S_1': '000', 'S_2': '0010011001'}
+ [*] The Crow 0 reaches a new location  {'S_1': '010', 'S_2': '1001110111'} .
+ [*] The Crow 1 on location {'S_1': '100', 'S_2': '0011001111'} is following the Crow 0 on location {'S_1': '010', 'S_2': '1001110111'}
+ [*] The Crow 0  is aware of being followed by the Crow 1
+ [*] So the Crow 0  leads the Crow 1 in direction of a random location {'S_1': '000', 'S_2': '0010011001'}
+ [*] The Crow 1 reaches a new location  {'S_1': '010', 'S_2': '1100101111'} .
+ [*] The Crow 2 on location {'S_1': '101', 'S_2': '0101010100'} is following the Crow 0 on location {'S_1': '010', 'S_2': '1001110111'}
+ [*] The Crow 0  is aware of being followed by the Crow 2
+ [*] So the Crow 0  leads the Crow 2 in direction of a random location {'S_1': '000', 'S_2': '0010011001'}
+ [*] The Crow 2 reaches a new location  {'S_1': '101', 'S_2': '1000001110'} .
+Running iteration #4...
+ [*] Evaluating individual 0 on  {'S_1': '010', 'S_2': '1001110111'} .
+ [*] Fitness of Crow 0 on location {'S_1': '100', 'S_2': '0000011000'}  was 0.99719001 .
+ [*] Best known performance of Crow 0  is 0.99721994 on location {'S_1': '000', 'S_2': '0010011001'}
+ [*] Performance of Crow 0  is 0.99721992 on location {'S_1': '010', 'S_2': '1001110111'}
+ [*] Best known performance for Crow 0  remains the same  0.99721994 on location {'S_1': '000', 'S_2': '0010011001'}
+ [*] Evaluating individual 1 on  {'S_1': '010', 'S_2': '1100101111'} .
+ [*] Fitness of Crow 1 on location {'S_1': '100', 'S_2': '0011001111'}  was 0.99707994 .
+ [*] Best known performance of Crow 1  is 0.99737005 on location {'S_1': '010', 'S_2': '0001001111'}
+ [*] Performance of Crow 1  is 0.99713001 on location {'S_1': '010', 'S_2': '1100101111'}
+ [*] Best known performance for Crow 1  remains the same  0.99737005 on location {'S_1': '010', 'S_2': '0001001111'}
+ [*] Evaluating individual 2 on  {'S_1': '101', 'S_2': '1000001110'} .
+ [*] Fitness of Crow 2 on location {'S_1': '101', 'S_2': '0101010100'}  was 0.99695000 .
+ [*] Best known performance of Crow 2  is 0.99751998 on location {'S_1': '100', 'S_2': '1011001111'}
+ [*] Performance of Crow 2  is 0.99707001 on location {'S_1': '101', 'S_2': '1000001110'}
+ [*] Best known performance for Crow 2  remains the same  0.99751998 on location {'S_1': '100', 'S_2': '1011001111'}
+Crow with best location is:
+{'S_1': '010', 'S_2': '1001110111'}
+Fitness value is: 0.9972
+
+ [*] The Crow 0 on location {'S_1': '010', 'S_2': '1001110111'} is following the Crow 0 on location {'S_1': '010', 'S_2': '1001110111'}
+ [*] The Crow 0  is aware of being followed by the Crow 0
+ [*] So the Crow 0  leads the Crow 0 in direction of a random location {'S_1': '000', 'S_2': '0010011001'}
+ [*] The Crow 0 reaches a new location  {'S_1': '010', 'S_2': '1010111101'} .
+ [*] The Crow 1 on location {'S_1': '010', 'S_2': '1100101111'} is following the Crow 0 on location {'S_1': '010', 'S_2': '1010111101'}
+ [*] The Crow 0  is aware of being followed by the Crow 1
+ [*] So the Crow 0  leads the Crow 1 in direction of a random location {'S_1': '000', 'S_2': '0010011001'}
+ [*] The Crow 1 reaches a new location  {'S_1': '100', 'S_2': '1000010110'} .
+ [*] The Crow 2 on location {'S_1': '101', 'S_2': '1000001110'} is following the Crow 0 on location {'S_1': '010', 'S_2': '1010111101'}
+ [*] The Crow 0  is aware of being followed by the Crow 2
+ [*] So the Crow 0  leads the Crow 2 in direction of a random location {'S_1': '000', 'S_2': '0010011001'}
+ [*] The Crow 2 reaches a new location  {'S_1': '100', 'S_2': '0010000110'} .
+Running iteration #5...
+ [*] Evaluating individual 0 on  {'S_1': '010', 'S_2': '1010111101'} .
+ [*] Fitness of Crow 0 on location {'S_1': '010', 'S_2': '1001110111'}  was 0.99721992 .
+ [*] Best known performance of Crow 0  is 0.99721994 on location {'S_1': '000', 'S_2': '0010011001'}
+ [*] Performance of Crow 0  is 0.99699997 on location {'S_1': '010', 'S_2': '1010111101'}
+ [*] Best known performance for Crow 0  remains the same  0.99721994 on location {'S_1': '000', 'S_2': '0010011001'}
+ [*] Evaluating individual 1 on  {'S_1': '100', 'S_2': '1000010110'} .
+ [*] Fitness of Crow 1 on location {'S_1': '010', 'S_2': '1100101111'}  was 0.99713001 .
+ [*] Best known performance of Crow 1  is 0.99737005 on location {'S_1': '010', 'S_2': '0001001111'}
+ [*] Performance of Crow 1  is 0.99753997 on location {'S_1': '100', 'S_2': '1000010110'}
+ [*] Updating best known performance for Crow 1  to 0.99753997 on location {'S_1': '100', 'S_2': '1000010110'}
+ [*] Evaluating individual 2 on  {'S_1': '100', 'S_2': '0010000110'} .
+ [*] Fitness of Crow 2 on location {'S_1': '101', 'S_2': '1000001110'}  was 0.99707001 .
+ [*] Best known performance of Crow 2  is 0.99751998 on location {'S_1': '100', 'S_2': '1011001111'}
+ [*] Performance of Crow 2  is 0.99714000 on location {'S_1': '100', 'S_2': '0010000110'}
+ [*] Best known performance for Crow 2  remains the same  0.99751998 on location {'S_1': '100', 'S_2': '1011001111'}
+Crow with best location is:
+{'S_1': '100', 'S_2': '1000010110'}
+Fitness value is: 0.9975
+
+ [*] The Crow 0 on location {'S_1': '010', 'S_2': '1010111101'} is following the Crow 1 on location {'S_1': '100', 'S_2': '1000010110'}
+ [*] The Crow 1  is aware of being followed by the Crow 0
+ [*] So the Crow 1  leads the Crow 0 in direction of a random location {'S_1': '100', 'S_2': '1000010110'}
+ [*] The Crow 0 reaches a new location  {'S_1': '100', 'S_2': '1011011000'} .
+ [*] The Crow 1 on location {'S_1': '100', 'S_2': '1000010110'} is following the Crow 1 on location {'S_1': '100', 'S_2': '1000010110'}
+ [*] The Crow 1  is aware of being followed by the Crow 1
+ [*] So the Crow 1  leads the Crow 1 in direction of a random location {'S_1': '100', 'S_2': '1000010110'}
+ [*] The Crow 1 reaches a new location  {'S_1': '110', 'S_2': '0001000111'} .
+ [*] The Crow 2 on location {'S_1': '100', 'S_2': '0010000110'} is following the Crow 1 on location {'S_1': '110', 'S_2': '0001000111'}
+ [*] The Crow 1  is not aware of being followed by the Crow 2
+ [*] So the Crow 1  leads the Crow 2 in direction of it's best known location {'S_1': '100', 'S_2': '1000010110'}
+ [*] The flight length of Crow 2  is  3
+ [*] The Crow 2 reaches a new location  {'S_1': '100', 'S_2': '0110000110'} .
+Running iteration #6...
+ [*] Evaluating individual 0 on  {'S_1': '100', 'S_2': '1011011000'} .
+ [*] Fitness of Crow 0 on location {'S_1': '010', 'S_2': '1010111101'}  was 0.99699997 .
+ [*] Best known performance of Crow 0  is 0.99721994 on location {'S_1': '000', 'S_2': '0010011001'}
+ [*] Performance of Crow 0  is 0.99717999 on location {'S_1': '100', 'S_2': '1011011000'}
+ [*] Best known performance for Crow 0  remains the same  0.99721994 on location {'S_1': '000', 'S_2': '0010011001'}
+ [*] Evaluating individual 1 on  {'S_1': '110', 'S_2': '0001000111'} .
+ [*] Fitness of Crow 1 on location {'S_1': '100', 'S_2': '1000010110'}  was 0.99753997 .
+ [*] Best known performance of Crow 1  is 0.99753997 on location {'S_1': '100', 'S_2': '1000010110'}
+ [*] Performance of Crow 1  is 0.99734999 on location {'S_1': '110', 'S_2': '0001000111'}
+ [*] Best known performance for Crow 1  remains the same  0.99753997 on location {'S_1': '100', 'S_2': '1000010110'}
+ [*] Evaluating individual 2 on  {'S_1': '100', 'S_2': '0110000110'} .
+ [*] Fitness of Crow 2 on location {'S_1': '100', 'S_2': '0110000110'}  was 0.99714000 .
+ [*] Best known performance of Crow 2  is 0.99751998 on location {'S_1': '100', 'S_2': '1011001111'}
+ [*] Performance of Crow 2  is 0.99728998 on location {'S_1': '100', 'S_2': '0110000110'}
+ [*] Best known performance for Crow 2  remains the same  0.99751998 on location {'S_1': '100', 'S_2': '1011001111'}
+Crow with best location is:
+{'S_1': '110', 'S_2': '0001000111'}
+Fitness value is: 0.9973
+
+ [*] The Crow 0 on location {'S_1': '100', 'S_2': '1011011000'} is following the Crow 1 on location {'S_1': '110', 'S_2': '0001000111'}
+ [*] The Crow 1  is aware of being followed by the Crow 0
+ [*] So the Crow 1  leads the Crow 0 in direction of a random location {'S_1': '100', 'S_2': '1000010110'}
+ [*] The Crow 0 reaches a new location  {'S_1': '100', 'S_2': '1111001111'} .
+ [*] The Crow 1 on location {'S_1': '110', 'S_2': '0001000111'} is following the Crow 1 on location {'S_1': '110', 'S_2': '0001000111'}
+ [*] The Crow 1  is aware of being followed by the Crow 1
+ [*] So the Crow 1  leads the Crow 1 in direction of a random location {'S_1': '100', 'S_2': '1000010110'}
+ [*] The Crow 1 reaches a new location  {'S_1': '000', 'S_2': '0101001110'} .
+ [*] The Crow 2 on location {'S_1': '100', 'S_2': '0110000110'} is following the Crow 1 on location {'S_1': '000', 'S_2': '0101001110'}
+ [*] The Crow 1  is aware of being followed by the Crow 2
+ [*] So the Crow 1  leads the Crow 2 in direction of a random location {'S_1': '100', 'S_2': '1000010110'}
+ [*] The Crow 2 reaches a new location  {'S_1': '011', 'S_2': '1010101101'} .
