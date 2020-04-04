@@ -336,6 +336,13 @@ class CrowIndividual(object):
         self.learning_rate = learning_rate
         self.batch_size = batch_size
 
+        for name, connections in self.space.items():
+            bit_string = self.location[name]
+            if len(bit_string) < connections:
+                for bit in range(connections - len(bit_string)):
+                    bit_string = "0" + bit_string
+            self.location[name] = bit_string
+
     def validate_space(self):
         """Check genome structure."""
         if type(self.space) != dict:
@@ -487,7 +494,11 @@ class CrowIndividual(object):
             last=0
             for name, connections in self.space.items():
                 end=last+connections
-                self.location[name] = bin_xiplus1[last:end]
+                bit_string=bin_xiplus1[last:end]
+                if len(bit_string)<connections:
+                    for bit in range(connections-len(bit_string)):
+                        bit_string="0"+bit_string
+                self.location[name] = bit_string
                 last=end
         else:
             print(" [*] The Crow {}".format(crow.id), " is aware of being followed by the Crow {}".format(self.id))
