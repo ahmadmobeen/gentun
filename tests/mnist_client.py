@@ -13,7 +13,7 @@ import numpy as np
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 parser = argparse.ArgumentParser("Neural Architecture Search Client")
-parser.add_argument('-d', '--dataset', type=str, default="mnist", help="Name of dataset (cifar10/mnist)")
+parser.add_argument('-d', '--dataset', type=str, default="cifar10", help="Name of dataset (cifar10/mnist)")
 parser.add_argument('-a', '--algorithm', type=str, default="csa", help="Name of algorithm (csa/ga)")
 args = parser.parse_args()
 

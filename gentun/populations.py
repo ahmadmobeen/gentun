@@ -102,9 +102,16 @@ class  Flock(object):
             for individual in self.individuals:
                 print(individual.get_id(),individual.get_location())
         else:
-            assert all([type(individual) is self.species for individual in individual_list])
+            self.individuals = [
+                self.species(
+                    self.x_train, self.y_train, flight_length, awareness_probability, id=i, location=location,
+                    input_shape=self.input_shape, classes=self.nb_classes, **additional_parameters
+                )
+                for i,location in enumerate(individual_list)
+            ]
+            assert all([type(individual) is self.species for individual in self.individuals])
             self.flock_size = len(individual_list)
-            self.individuals = individual_list
+            # self.individuals = individual_list
 
     def add_individual(self, individual):
         assert type(individual) is self.species

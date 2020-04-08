@@ -354,6 +354,7 @@ class CrowIndividual(object):
     def validate_location(self):
         """Check that genes are compatible with genome."""
         if set(self.space.keys()) != set(self.location.keys()):
+            print(self.get_id())
             raise ValueError("Location passed don't correspond to individual's space.")
 
     def validate_memory(self):
@@ -453,12 +454,12 @@ class CrowIndividual(object):
         # self.evaluate_fitness()
         return self.best_fitness
 
-    def follow(self,crow):
+    def old_follow(self,crow):
         assert self.__class__ == crow.__class__  # Can only reproduce if they're the same species
         print("\n [*] The Crow {}".format(self.id),"on location",self.get_location(),"is following the Crow {}".format(crow.id),"on location",crow.get_location())
-        #Todo: Print story line of crow chase
+
         self.last_location=self.location
-        if (random.randint(1, 100)/100.00) < self.awareness_probability:
+        if (random.randint(1, 100)/100.00) > self.awareness_probability:
             print(" [*] The Crow {}".format(crow.id), " is not aware of being followed by the Crow {}".format(self.id))
             print(" [*] So the Crow {}".format(crow.id), " leads the Crow {}".format(self.id),"in direction of it's best known location", crow.get_memory())
 
@@ -490,6 +491,60 @@ class CrowIndividual(object):
             if len(bin_xiplus1) > len(bin_xi):
                 len_diff = len(bin_xiplus1) - len(bin_xi)
                 bin_xiplus1 = bin_xiplus1[len_diff:]
+
+            last=0
+            for name, connections in self.space.items():
+                end=last+connections
+                bit_string=bin_xiplus1[last:end]
+                if len(bit_string)<connections:
+                    for bit in range(connections-len(bit_string)):
+                        bit_string="0"+bit_string
+                self.location[name] = bit_string
+                last=end
+        else:
+            print(" [*] The Crow {}".format(crow.id), " is aware of being followed by the Crow {}".format(self.id))
+            print(" [*] So the Crow {}".format(crow.id), " leads the Crow {}".format(self.id), "in direction of a random location")
+            self.location = self.fly_random_location(self.space)
+
+        print(" [*] The Crow {}".format(self.id), "reaches a new location ",self.get_location(),".")
+
+    def follow(self,crow):
+        assert self.__class__ == crow.__class__  # Can only reproduce if they're the same species
+        print("\n [*] The Crow {}".format(self.id),"on location",self.get_location(),"is following the Crow {}".format(crow.id),"on location",crow.get_location())
+
+        self.last_location=self.location
+        if (random.randint(1, 100)/100.00) > self.awareness_probability:
+            print(" [*] The Crow {}".format(crow.id), " is not aware of being followed by the Crow {}".format(self.id))
+            print(" [*] So the Crow {}".format(crow.id), " leads the Crow {}".format(self.id),"in direction of it's best known location", crow.get_memory())
+
+            bin_xi="".join([self.get_location()[stage] for stage in self.get_location().keys()])
+            bin_mj = "".join([crow.get_memory()[stage] for stage in crow.get_memory().keys()])
+
+            diff_pos = []
+            for bit_pos, bit_xi in enumerate(bin_xi):
+                if bit_xi != bin_mj[bit_pos]:
+                    diff_pos.append(bit_pos)
+            print(diff_pos)
+
+            fl = random.randrange(0, self.flight_length, 1)
+            fl = random.randrange(0, 2*len(diff_pos), 1)
+            print(" [*] The flight length of Crow {}".format(self.id), " is ", fl)
+
+            if fl > len(diff_pos):
+                index = random.sample([x for x in range(0, len(bin_xi)) if x not in diff_pos], fl - len(diff_pos))
+                diff_pos.extend(index)
+            else:
+                diff_pos = random.sample(diff_pos, fl)
+            print(diff_pos)
+
+            bin_xiplus1 = list(bin_xi)
+            for i in diff_pos:
+                if bin_xiplus1[i] == '1':
+                    bin_xiplus1[i] = '0'
+                else:
+                    bin_xiplus1[i] = '1'
+
+            bin_xiplus1 = "".join(bin_xiplus1)
 
             last=0
             for name, connections in self.space.items():

@@ -75,9 +75,9 @@ class RpcClient(object):
         print(" [*] Fitness of Crow {}".format(id), "on location", last_location," was {:.8f}".format(fitness), ".")
         print(" [*] Best known performance of Crow {}".format(id), " is", "{:.8f}".format(best_fitness),"on location", memory)
         client_id,client_last_location,client_acc,client_memory,client_best_acc,client_location=json.loads(self.response)
-        assert(id==client_id)
-        assert(location==client_location)
-        assert(last_location==client_last_location)
+        # assert(id==client_id)
+        # assert(location==client_location)
+        # assert(last_location==client_last_location)
         print(" [*] Performance of Crow {}".format(id)," is", "{:.8f}".format(client_acc), "on location", location)
         if best_fitness == None or best_fitness < client_acc:
             print(" [*] Updating best known performance for Crow {}".format(id), " to","{:.8f}".format(client_best_acc), "on location", client_memory)

@@ -27,12 +27,12 @@ class GeneticCnnModel(GentunModel):
             dense_units, dropout_probability, classes
         )
         # support for multi-gpus
-        try:
-            self.parallel_model = multi_gpu_model(self.model, gpus=2)
-            print("Training using multiple GPUs..")
-        except ValueError:
-            self.parallel_model = self.model
-            print("Training using single GPU..")
+        # try:
+        #     self.parallel_model = multi_gpu_model(self.model, gpus=2)
+        #     print("Training using multiple GPUs..")
+        # except ValueError:
+        self.parallel_model = self.model
+        print("Training using single GPU..")
 
         self.name = '-'.join(gene for gene in genes.values())
         self.kfold = kfold
