@@ -11,7 +11,7 @@ data={
 }
 init=False
 id=0
-with open("200407_csa_20i_20c_fl13_ap15.txt" , 'r') as f:
+with open("200410_c20_i20_scaledfl13_ap15_newdistance.txt" , 'r') as f:
     lines=f.readlines()
     for i,line in enumerate(lines):
         if "Initializing a random flock." in line:
@@ -162,9 +162,9 @@ plt.xlabel('Number of Iterations')
 plt.title('Performance Over Iterataions')
 # plt.xticks(ind, ('G1', 'G2', 'G3', 'G4', 'G5'))
 plt.xticks(np.arange(0, data["total_iterations"], 1))
-plt.yticks(np.arange(0.910, 0.917, 0.001))
+plt.yticks(np.arange(0.910, 0.92, 0.001))
 
-plt.savefig('200407_csa_20i_20c_fl13_ap15.png')
+plt.savefig('200410_c20_i20_scaledfl13_ap15_newdistance.png')
 plt.show()
 
 

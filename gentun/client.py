@@ -36,7 +36,7 @@ class GentunClient(object):
             self.connection.process_data_events()
 
     def on_request(self, channel, method, properties, body):
-        i, genes, fitness,last_location,best_fitness,memory,new_location,additional_parameters = json.loads(body)
+        i, genes, fitness,last_location,best_fitness,memory,new_location,additional_parameters,exp_no = json.loads(body)
         print(additional_parameters)
         # If an additional parameter is received as a list, convert to tuple
         for param in additional_parameters.keys():
@@ -53,13 +53,16 @@ class GentunClient(object):
             response = json.dumps([i, fitness])
         elif self.algorithm=="csa":
             individual = self.individual(self.x_train, self.y_train, id=i,space=genes, location=new_location,memory=memory,best_fitness=best_fitness,fitness=fitness,last_location=last_location,**additional_parameters)
+            import time
+            start_time=time.time()
             fitness = individual.evaluate_fitness()
+            training_time=time.time()-start_time
             best_fitness = individual.get_best_fitness()
             memory = individual.get_memory()
             location=individual.get_location()
             last_location=individual.get_last_location()
             # Prepare response for master and send it
-            response = json.dumps([i, last_location,fitness,memory,best_fitness,location])
+            response = json.dumps([i, last_location,fitness,memory,best_fitness,location,training_time])
 
 
         channel.basic_publish(

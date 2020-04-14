@@ -20,7 +20,6 @@ args = parser.parse_args()
 
 if __name__ == '__main__':
     import random
-
     from sklearn.preprocessing import LabelBinarizer
     from gentun import GentunClient, GeneticCnnIndividual, CrowIndividual
 

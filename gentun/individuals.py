@@ -290,8 +290,8 @@ class CrowIndividual(object):
     genome and a random individual generator.
     """
 
-    def __init__(self, x_train, y_train, flight_length=13,awareness_probability=0.15,space=None, location=None, fitness=0,memory=None,best_fitness=0,last_location=None,id=None, nodes=(3, 5),
-                 input_shape=(28, 28, 1), kernels_per_layer=(20, 50), kernel_sizes=((5, 5), (5, 5)), dense_units=500,
+    def __init__(self, x_train, y_train, flight_length=13,awareness_probability=0.15,space=None, location=None, fitness=0,memory=None,best_fitness=0,last_location=None,id=None, nodes=(3,4,5),
+                 input_shape=(28, 28, 1), kernels_per_layer=(64,128,256), kernel_sizes=((3,3), (3,3), (3,3)), dense_units=1024,
                  dropout_probability=0.5, classes=10, kfold=5, epochs=(3,), learning_rate=(1e-3,), batch_size=32):
 
 
@@ -524,37 +524,44 @@ class CrowIndividual(object):
             for bit_pos, bit_xi in enumerate(bin_xi):
                 if bit_xi != bin_mj[bit_pos]:
                     diff_pos.append(bit_pos)
-            print(diff_pos)
+            # print(diff_pos)
 
-            fl = random.randrange(0, self.flight_length, 1)
-            fl = random.randrange(0, 2*len(diff_pos), 1)
-            print(" [*] The flight length of Crow {}".format(self.id), " is ", fl)
+            # fl = random.randrange(0, self.flight_length, 1)
+            if len(diff_pos)>0:
+                from numpy import round,sqrt
+                fl = random.randrange(0, int(round(sqrt(13*len(diff_pos)-9))), 1)
 
-            if fl > len(diff_pos):
-                index = random.sample([x for x in range(0, len(bin_xi)) if x not in diff_pos], fl - len(diff_pos))
-                diff_pos.extend(index)
-            else:
-                diff_pos = random.sample(diff_pos, fl)
-            print(diff_pos)
+                print(" [*] The flight length of Crow {}".format(self.id), " is ", fl)
 
-            bin_xiplus1 = list(bin_xi)
-            for i in diff_pos:
-                if bin_xiplus1[i] == '1':
-                    bin_xiplus1[i] = '0'
+                if fl > len(diff_pos):
+                    index = random.sample([x for x in range(0, len(bin_xi)) if x not in diff_pos], fl - len(diff_pos))
+                    diff_pos.extend(index)
                 else:
-                    bin_xiplus1[i] = '1'
+                    diff_pos = random.sample(diff_pos, fl)
+                # print(diff_pos)
 
-            bin_xiplus1 = "".join(bin_xiplus1)
+                bin_xiplus1 = list(bin_xi)
+                for i in diff_pos:
+                    if bin_xiplus1[i] == '1':
+                        bin_xiplus1[i] = '0'
+                    else:
+                        bin_xiplus1[i] = '1'
 
-            last=0
-            for name, connections in self.space.items():
-                end=last+connections
-                bit_string=bin_xiplus1[last:end]
-                if len(bit_string)<connections:
-                    for bit in range(connections-len(bit_string)):
-                        bit_string="0"+bit_string
-                self.location[name] = bit_string
-                last=end
+                bin_xiplus1 = "".join(bin_xiplus1)
+
+                last=0
+                for name, connections in self.space.items():
+                    end=last+connections
+                    bit_string=bin_xiplus1[last:end]
+                    if len(bit_string)<connections:
+                        for bit in range(connections-len(bit_string)):
+                            bit_string="0"+bit_string
+                    self.location[name] = bit_string
+                    last=end
+            else:
+                print(" [*] The Crow {}".format(crow.id), " and the Crow {}".format(self.id), "are same location.")
+                print(" [*] So the Crow {}".format(self.id), "stays at same location ", self.get_location(), ".")
+
         else:
             print(" [*] The Crow {}".format(crow.id), " is aware of being followed by the Crow {}".format(self.id))
             print(" [*] So the Crow {}".format(crow.id), " leads the Crow {}".format(self.id), "in direction of a random location")

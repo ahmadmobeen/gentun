@@ -5,6 +5,10 @@ Genetic algorithm class
 
 import random
 import operator
+import pymongo
+db_client=pymongo.MongoClient("223.195.37.85",27017)
+db=db_client["binaryCSA"]
+exp_col=db["experiments"]
 
 class GeneticAlgorithm(object):
     """Evolve a population iteratively to find better
@@ -118,10 +122,11 @@ class CrowSearchAlgorithm(object):
     def get_flock_type(self):
         return self.flock.__class__
 
-    def run(self, max_iterations):
+    def run(self, max_iterations,exp_no):
         print("\nStarting Crow Search Algorithm...")
         self.max_iterations=max_iterations
         while self.iteration <= max_iterations:
+            exp_col.update_one({"no":exp_no},{"$push":{"iterations":[]}})
             self.release_flock()
             self.iteration += 1
 

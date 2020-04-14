@@ -8,7 +8,11 @@ running in 'localhost'.
 import os
 import sys
 import argparse
-
+import pymongo
+import time
+from _datetime import timedelta,datetime
+db_client=pymongo.MongoClient("223.195.37.85",27017)
+db=db_client["binaryCSA"]
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 parser = argparse.ArgumentParser("Neural Architecture Search Server")
 parser.add_argument('-d', '--dataset', type=str, default="cifar10", help="Name of dataset (cifar10/mnist)")
@@ -65,19 +69,73 @@ if __name__ == '__main__':
 
     elif args.algorithm=="csa":
 
-        individuals_list=load_individuals("../200407_csa_20i_20c_fl13_ap15.txt")
+        individuals_list=None
+        seed_file=None
+        # seed_file="../200407_csa_20i_20c_fl13_ap15.txt"
+        #load_individuals(seed_file)
 
-        # print(individuals_list)
-        # exit()
+        flock_size = 20
+        flight_length = 13
+        awareness_probability = 0.15
+        tournament_size = 5
+        iterations = 20
+        kfold = 3
+
+        nodes = (3, 4, 5)
+        kernels_per_layer = (64, 128, 256)
+        kernel_sizes = ((3, 3), (3, 3), (3, 3))
+        dense_units = 1024
+        epochs = (120, 60, 40, 20)
+        learning_rates = (1e-2, 1e-3, 1e-4, 1e-5)
+        batch_size = 32
+        dropout_probability = 0.5
+
+        maximize = True
+        host = 'localhost'
+        port = 5672
+        user = 'test'
+        password = 'test'
+
+
+
+
+
+
+        start_time=time.time()
+        exp_col=db["experiments"]
+        experiment_no=exp_col.estimated_document_count()+1
+        experiment_doc={
+            "no": experiment_no,
+            "start": start_time,
+            "seed_file" : seed_file,
+            "flock_size" : flock_size,
+            "flight_length" : flight_length,
+            "awareness_probability" : awareness_probability,
+            "tournament_size" : tournament_size,
+            "maximize" : maximize,
+            'kfold': kfold, 'epochs': epochs, 'learning_rate': learning_rates, 'batch_size': batch_size,
+            "nodes": nodes, "kernels_per_layer": kernels_per_layer, "kernel_sizes": kernel_sizes,
+            "dense_units": dense_units,
+            "dropout_probability": dropout_probability,
+            "iterations":[]
+        }
+
+        exp_col.insert_one(experiment_doc)
+        print("Running Experiment Number",experiment_no,"at",datetime.fromtimestamp(start_time))
 
         flock = DistributedFlock(
-            CrowIndividual, input_shape=input_shape,nb_classes=nb_classes,size=20, flight_length=13, awareness_probability=0.15, individual_list=individuals_list,
+            CrowIndividual, input_shape=input_shape,nb_classes=nb_classes,size=flock_size, flight_length=flight_length, awareness_probability=awareness_probability, individual_list=individuals_list,
             additional_parameters={
-                'kfold': 3, 'epochs': (20, 4, 1), 'learning_rate': (1e-3, 1e-4, 1e-5), 'batch_size': 32
-            }, maximize=True, host='localhost', user='test', password='test'
+                'kfold': kfold, 'epochs': epochs, 'learning_rate': learning_rates, 'batch_size': batch_size,
+                "nodes": nodes, "kernels_per_layer": kernels_per_layer, "kernel_sizes": kernel_sizes, "dense_units": dense_units,
+                "dropout_probability": dropout_probability
+            }, maximize=maximize, host=host, port=port, user=user, password=password,exp_no=experiment_no
         )
-        # exit()
-        csa = CrowSearchAlgorithm(flock,5)
-        csa.run(20)
+
+        csa = CrowSearchAlgorithm(flock,tournament_size)
+        csa.run(iterations,experiment_no)
+        running_time=time.time()-start_time
+        exp_col.update_one({"no":experiment_no},{"$set":{"exec_time":timedelta(seconds=running_time)}})
+        print("Total Running Time is",running_time)
     else:
         raise Exception("Only GA and CSA are supported")

@@ -12,7 +12,10 @@ import time
 import uuid
 import ast
 from .populations import Population, Flock,GridPopulation
-
+import pymongo
+db_client=pymongo.MongoClient("223.195.37.85",27017)
+db=db_client["binaryCSA"]
+exp_col=db["experiments"]
 
 class RpcClient(object):
     """Define a client which sends work orders to a
@@ -69,12 +72,14 @@ class RpcClient(object):
         )
         while self.response is None:
             time.sleep(3)
-        id, _, fitness,last_location,best_fitness,memory,location,_=json.loads(parameters)
+        id, _, fitness,last_location,best_fitness,memory,location,_,exp_no=json.loads(parameters)
 
         print("\n [*] Evaluating individual {}".format(id), "on ", location, ".")
         print(" [*] Fitness of Crow {}".format(id), "on location", last_location," was {:.8f}".format(fitness), ".")
         print(" [*] Best known performance of Crow {}".format(id), " is", "{:.8f}".format(best_fitness),"on location", memory)
-        client_id,client_last_location,client_acc,client_memory,client_best_acc,client_location=json.loads(self.response)
+
+
+        client_id,client_last_location,client_acc,client_memory,client_best_acc,client_location,client_train_time=json.loads(self.response)
         # assert(id==client_id)
         # assert(location==client_location)
         # assert(last_location==client_last_location)
@@ -83,6 +88,19 @@ class RpcClient(object):
             print(" [*] Updating best known performance for Crow {}".format(id), " to","{:.8f}".format(client_best_acc), "on location", client_memory)
         else:
             print(" [*] Best known performance for Crow {}".format(id), " remains the same ","{:.8f}".format(client_best_acc), "on location", client_memory)
+        print(" [*] Training time of Crow {}".format(id), " is", client_train_time)
+
+        crow_doc={
+            "id":client_id,
+            "acc":client_acc,
+            "memory":client_memory,
+            "best":client_best_acc,
+            "location":client_location,
+            "train_time":client_train_time
+        }
+
+        iteration=len(exp_col.find({"no":exp_no})[0]["iterations"])-1
+        exp_col.update_one({"no":exp_no},{"$push":{"iterations."+str(iteration):crow_doc}})
 
         # id=int(self.response.decode().split(",")[0].split("[")[1])
         # acc=float(self.response.decode().split(",")[1])
@@ -159,7 +177,7 @@ class DistributedFlock(Flock):
 
     def __init__(self, species, x_train=None, y_train=None, input_shape=(28,28,1),nb_classes=10,individual_list=None, size=None,
                  flight_length=13,awareness_probability=0.15, maximize=True, additional_parameters=None,
-                 host='localhost', port=5672, user='test', password='test', rabbit_queue='rpc_queue'):
+                 host='localhost', port=5672, user='test', password='test', rabbit_queue='rpc_queue',exp_no=0):
         super(DistributedFlock, self).__init__(
             species, x_train, y_train, input_shape,nb_classes,individual_list, size,
             flight_length,awareness_probability, maximize, additional_parameters
@@ -171,6 +189,7 @@ class DistributedFlock(Flock):
             'password': password,
             'rabbit_queue': rabbit_queue
         }
+        self.exp_no=exp_no
 
     def get_fittest(self):
         """Evaluate necessary individuals in parallel before getting fittest."""
@@ -190,7 +209,7 @@ class DistributedFlock(Flock):
         for i, individual in enumerate(self.individuals):
             # if not individual.get_fitness_status():
             if individual.get_location() not in explored:
-                job_order = json.dumps([i, individual.get_space(), individual.get_fitness(),individual.get_last_location(),individual.get_best_fitness(),individual.get_memory(),individual.get_location(),individual.get_additional_parameters()])
+                job_order = json.dumps([i, individual.get_space(), individual.get_fitness(),individual.get_last_location(),individual.get_best_fitness(),individual.get_memory(),individual.get_location(),individual.get_additional_parameters(),self.exp_no])
                 jobs.put(True)
                 client = RpcClient(jobs, responses, **self.credentials)
                 communication_thread = threading.Thread(target=client.call, args=[job_order])
