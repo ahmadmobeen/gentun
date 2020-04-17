@@ -10,6 +10,7 @@ import sys
 import argparse
 import pymongo
 import time
+from pprint import pprint
 from _datetime import timedelta,datetime
 db_client=pymongo.MongoClient("223.195.37.85",27017)
 db=db_client["binaryCSA"]
@@ -19,28 +20,36 @@ parser.add_argument('-d', '--dataset', type=str, default="cifar10", help="Name o
 parser.add_argument('-a', '--algorithm', type=str, default="csa", help="Name of algorithm (csa/ga)")
 args = parser.parse_args()
 
-def load_individuals(file):
+def load_individuals(file,fromdb=True):
     import json
 
-    data = {
-        "flock_size": 0,
-        "total_iterations": 0,
-        "initial_flock": [],
-        "iterations": []
-    }
-    init = False
-    id = 0
-    with open(file, 'r') as f:
-        lines = f.readlines()
-        for i, line in enumerate(lines):
-            if "Initializing a random flock." in line:
-                data["flock_size"] = int(line.split(":")[1])
-            if "S_1" in line and not init:
-                id = line.split(" ")[0]
-                data["initial_flock"].append(json.loads(line.replace(id + " ", "").replace("\'", "\"")))
-            if "Starting Crow Search Algorithm..." in line:
-                init = True
-    return data["initial_flock"]
+    if fromdb:
+        initial_flock=[]
+        exp_col = db["experiments"]
+        flock=exp_col.find_one({"no":file})["iterations"][0]
+        for crow in flock:
+            initial_flock.append(crow["location"])
+        return initial_flock
+    else:
+        data = {
+            "flock_size": 0,
+            "total_iterations": 0,
+            "initial_flock": [],
+            "iterations": []
+        }
+        init = False
+        id = 0
+        with open(file, 'r') as f:
+            lines = f.readlines()
+            for i, line in enumerate(lines):
+                if "Initializing a random flock." in line:
+                    data["flock_size"] = int(line.split(":")[1])
+                if "S_1" in line and not init:
+                    id = line.split(" ")[0]
+                    data["initial_flock"].append(json.loads(line.replace(id + " ", "").replace("\'", "\"")))
+                if "Starting Crow Search Algorithm..." in line:
+                    init = True
+        return data["initial_flock"]
 
 if __name__ == '__main__':
     from gentun import RussianRouletteGA, DistributedPopulation, GeneticCnnIndividual, DistributedFlock,CrowIndividual,CrowSearchAlgorithm
@@ -72,40 +81,39 @@ if __name__ == '__main__':
         individuals_list=None
         seed_file=None
         # seed_file="../200407_csa_20i_20c_fl13_ap15.txt"
-        #load_individuals(seed_file)
+        individuals_list=load_individuals(3,fromdb=True)
 
+        iterations = 50
         flock_size = 20
         flight_length = 13
         awareness_probability = 0.15
         tournament_size = 5
-        iterations = 20
-        kfold = 3
 
         nodes = (3, 4, 5)
         kernels_per_layer = (64, 128, 256)
         kernel_sizes = ((3, 3), (3, 3), (3, 3))
         dense_units = 1024
+
+
+        kfold = 3
+        batch_size = 32
         epochs = (120, 60, 40, 20)
         learning_rates = (1e-2, 1e-3, 1e-4, 1e-5)
-        batch_size = 32
         dropout_probability = 0.5
-
         maximize = True
+
+
         host = 'localhost'
         port = 5672
         user = 'test'
         password = 'test'
-
-
-
-
-
 
         start_time=time.time()
         exp_col=db["experiments"]
         experiment_no=exp_col.estimated_document_count()+1
         experiment_doc={
             "no": experiment_no,
+            "algo":args.algorithm,
             "start": start_time,
             "seed_file" : seed_file,
             "flock_size" : flock_size,

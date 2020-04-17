@@ -223,7 +223,7 @@ class DistributedFlock(Flock):
         while not responses.empty():
             response = responses.get(False)
             # id, last_location, acc, memory, best_acc, new_location =
-            client_id, client_last_location, client_acc, client_memory, client_best_acc, client_location=json.loads(response)
+            client_id, client_last_location, client_acc, client_memory, client_best_acc, client_location,exec_time=json.loads(response)
             individual=self.individuals[client_id]
             assert (individual.get_id() == client_id)
             assert (individual.get_location() == client_location)

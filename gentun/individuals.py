@@ -529,7 +529,7 @@ class CrowIndividual(object):
             # fl = random.randrange(0, self.flight_length, 1)
             if len(diff_pos)>0:
                 from numpy import round,sqrt
-                fl = random.randrange(0, int(round(sqrt(13*len(diff_pos)-9))), 1)
+                fl = random.randrange(0, int(round(sqrt(len(bin_xi)*len(diff_pos)-15))), 1)
 
                 print(" [*] The flight length of Crow {}".format(self.id), " is ", fl)
 
