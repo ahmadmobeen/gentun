@@ -33,7 +33,7 @@ class GentunClient(object):
         """Send heartbeat messages to RabbitMQ server."""
         while True:
             time.sleep(10)
-            self.connection.process_data_events()
+            self.connection.process_data_events(time_limit=None)
 
     def on_request(self, channel, method, properties, body):
         i, genes, fitness,last_location,best_fitness,memory,new_location,additional_parameters,exp_no = json.loads(body)
