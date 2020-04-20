@@ -54,7 +54,7 @@ class RpcClient(object):
         while True:
             time.sleep(10)
             try:
-                self.connection.process_data_events(time_limit=None)
+                self.connection.process_data_events()
             except:
                 # Connection was closed, stop sending heartbeat messages
                 break

@@ -81,7 +81,7 @@ if __name__ == '__main__':
         individuals_list=None
         seed_file=None
         # seed_file="../200407_csa_20i_20c_fl13_ap15.txt"
-        individuals_list=load_individuals(3,fromdb=True)
+        # individuals_list=load_individuals(3,fromdb=True)
 
         iterations = 50
         flock_size = 20
@@ -89,16 +89,16 @@ if __name__ == '__main__':
         awareness_probability = 0.15
         tournament_size = 5
 
-        nodes = (3, 4, 5)
-        kernels_per_layer = (64, 128, 256)
-        kernel_sizes = ((3, 3), (3, 3), (3, 3))
+        nodes = (3, 5)#4, 5)
+        kernels_per_layer = (64, 128)#, 256)
+        kernel_sizes = ((3, 3), (3, 3))#, (3, 3))
         dense_units = 1024
 
 
         kfold = 3
         batch_size = 32
-        epochs = (120, 60, 40, 20)
-        learning_rates = (1e-2, 1e-3, 1e-4, 1e-5)
+        epochs = (5,4)#(120, 60, 40, 20)
+        learning_rates = (1e-2, 1e-3)#, 1e-4, 1e-5)
         dropout_probability = 0.5
         maximize = True
 

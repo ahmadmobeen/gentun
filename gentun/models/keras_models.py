@@ -150,6 +150,7 @@ class GeneticCnnModel(GentunModel):
                     self.x_train[train], self.y_train[train], epochs=epochs, batch_size=self.batch_size, verbose=1
                 )
             acc += self.parallel_model.evaluate(self.x_train[validation], self.y_train[validation], verbose=0)[1] / self.kfold
+        K.clear_session()
         return acc
 
 
