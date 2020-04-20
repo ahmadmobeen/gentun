@@ -10,6 +10,7 @@ from keras.layers import Input, Conv2D, Activation, Add, MaxPooling2D, Flatten, 
 from keras.optimizers import Adam
 from keras.models import Model
 from sklearn.model_selection import StratifiedKFold
+from keras import metrics
 from keras.utils import multi_gpu_model
 
 from .generic_models import GentunModel
@@ -138,19 +139,29 @@ class GeneticCnnModel(GentunModel):
         """Train model using k-fold cross validation and
         return mean value of the validation accuracy.
         """
+        loss=.0
         acc = .0
+        mae= .0
+        mse=.0
+        msle=.0
         kfold = StratifiedKFold(n_splits=self.kfold, shuffle=True)
         for fold, (train, validation) in enumerate(kfold.split(self.x_train, np.where(self.y_train == 1)[1])):
             print("KFold {}/{}".format(fold + 1, self.kfold))
             self.reset_weights()
             for epochs, learning_rate in zip(self.epochs, self.learning_rate):
                 print("Training {} epochs with learning rate {}".format(epochs, learning_rate))
-                self.parallel_model.compile(optimizer=Adam(lr=learning_rate), loss='binary_crossentropy', metrics=['accuracy'])
+                self.parallel_model.compile(optimizer=Adam(lr=learning_rate), loss='binary_crossentropy', metrics=['accuracy',metrics.mae,metrics.mse,metrics.msle])
                 self.parallel_model.fit(
                     self.x_train[train], self.y_train[train], epochs=epochs, batch_size=self.batch_size, verbose=1
                 )
-            acc += self.parallel_model.evaluate(self.x_train[validation], self.y_train[validation], verbose=0)[1] / self.kfold
+            results=self.parallel_model.evaluate(self.x_train[validation], self.y_train[validation], verbose=0)
+            # print(results)
+            loss += results[0] / self.kfold
+            acc += results[1] / self.kfold
+            mae += results[2] / self.kfold
+            mse += results[3] / self.kfold
+            msle += results[4] / self.kfold
         K.clear_session()
-        return acc
+        return loss, acc, mae, mse, msle
 
 

@@ -406,7 +406,8 @@ class CrowIndividual(object):
             self.kernel_sizes, self.dense_units, self.dropout_probability, self.classes,
             self.kfold, self.epochs, self.learning_rate, self.batch_size
         )
-        self.fitness = model.cross_validate()
+        self.loss,self.accuracy,self.mae,self.mse,self.msle= model.cross_validate()
+        self.fitness = self.accuracy
         print(" [*] Performance of Crow {}".format(self.id)," is", "{:.8f}".format(self.get_fitness()), "on location", self.get_location())
         if self.best_fitness==None or self.best_fitness < self.fitness:
             print(" [*] Updating best known performance for Crow {}".format(self.id)," to", "{:.8f}".format(self.get_fitness()), "on location", self.get_location())
@@ -529,7 +530,7 @@ class CrowIndividual(object):
             # fl = random.randrange(0, self.flight_length, 1)
             if len(diff_pos)>0:
                 from numpy import round,sqrt
-                fl = random.randrange(0, int(round(sqrt(len(bin_xi)*len(diff_pos)-15))), 1)
+                fl = random.randrange(0, int(round(sqrt(len(bin_xi)*len(diff_pos)-9))), 1)
 
                 print(" [*] The flight length of Crow {}".format(self.id), " is ", fl)
 

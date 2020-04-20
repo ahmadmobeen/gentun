@@ -62,7 +62,7 @@ class GentunClient(object):
             location=individual.get_location()
             last_location=individual.get_last_location()
             # Prepare response for master and send it
-            response = json.dumps([i, last_location,fitness,memory,best_fitness,location,training_time])
+            response = json.dumps([i, last_location,fitness,memory,best_fitness,location,training_time,individual.loss,individual.mae,individual.mse,individual.msle])
 
 
         channel.basic_publish(

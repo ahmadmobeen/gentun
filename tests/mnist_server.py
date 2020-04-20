@@ -90,15 +90,15 @@ if __name__ == '__main__':
         tournament_size = 5
 
         nodes = (3, 5)#4, 5)
-        kernels_per_layer = (64, 128)#, 256)
-        kernel_sizes = ((3, 3), (3, 3))#, (3, 3))
-        dense_units = 1024
+        kernels_per_layer = (20,50)#(64, 128)#, 256)
+        kernel_sizes = ((5, 5), (5, 5))#, (3, 3))
+        dense_units = 500#1024
 
 
-        kfold = 3
+        kfold = 5
         batch_size = 32
-        epochs = (5,4)#(120, 60, 40, 20)
-        learning_rates = (1e-2, 1e-3)#, 1e-4, 1e-5)
+        epochs = (20,4,1)#(120, 60, 40, 20)
+        learning_rates = (1e-3, 1e-4, 1e-5)
         dropout_probability = 0.5
         maximize = True
 
