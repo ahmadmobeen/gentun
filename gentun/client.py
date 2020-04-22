@@ -81,7 +81,11 @@ class GentunClient(object):
             self.channel.basic_consume(queue=self.rabbit_queue, on_message_callback=self.on_request)
             print(" [x] Awaiting master's requests")
             print(" [-] Press Ctrl+C to interrupt")
-            self.channel.start_consuming()
+            while True:
+                try:
+                    self.channel.start_consuming()
+                except:
+                    pass
         except KeyboardInterrupt:
             print()
             print("Good bye!")

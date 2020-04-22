@@ -119,6 +119,14 @@ class CrowSearchAlgorithm(object):
         self.tournament_size = tournament_size
         self.iteration = 1
         self.max_iterations=0
+        self.explored=[crow.get_location() for crow in self.flock]
+        unique=[]
+        for location in self.explored:
+            if location not in unique:
+                unique.append(location)
+        print(self.explored)
+        print(unique)
+        print("Flock Size",len(self.explored),";","Unique Crows",len(unique))
     def get_flock_type(self):
         return self.flock.__class__
 
@@ -141,7 +149,17 @@ class CrowSearchAlgorithm(object):
         if self.iteration <self.max_iterations:
             for i,_ in enumerate(self.flock):
                 crow=self.flock[i]
-                crow.follow(self.tournament_select(crow))
+                while crow.get_location() in self.explored:
+                    crow.follow(self.tournament_select(crow))
+                self.explored.append(crow.get_location())
+            # new_locations = [crow.get_location() for crow in self.flock]
+            # repeated=[]
+            # for location in new_locations:
+            #     if location in self.explored:
+            #         repeated.append(location)
+            # print("Flock Size", len(new_locations), ";", "Repeated Crows", len(repeated))
+            # for r in repeated:
+            #     print(r)
 
 
     def tournament_select(self,crow):

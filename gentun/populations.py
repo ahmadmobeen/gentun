@@ -86,18 +86,30 @@ class  Flock(object):
         self.nb_classes=nb_classes
         self.species = species
         self.maximize = maximize
+        self.explored=[]
+        self.individuals=[]
         if individual_list is None and size is None:
             raise ValueError("Either pass a list of crows or a flock size for a random flock.\n")
         elif individual_list is None:
             if additional_parameters is None:
                 additional_parameters = {}
             self.flock_size = size
-            self.individuals = [
-                self.species(
-                    self.x_train, self.y_train, flight_length,awareness_probability,id=i,input_shape=self.input_shape, classes=self.nb_classes,**additional_parameters
-                )
-                for i in range(size)
-            ]
+            print(self.explored)
+            for i in range(size):
+                crow=self.species(self.x_train, self.y_train, flight_length,awareness_probability,id=i,input_shape=self.input_shape, classes=self.nb_classes,**additional_parameters)
+                while crow.get_location() in self.explored:
+                    print (crow.get_location(), "already created")
+                    crow.fly_random_location(crow.get_space())
+
+                self.explored.append(crow.get_location())
+                self.individuals.append(crow)
+            print(self.explored)
+            # self.individuals = [
+            #     self.species(
+            #         self.x_train, self.y_train, flight_length,awareness_probability,id=i,input_shape=self.input_shape, classes=self.nb_classes,**additional_parameters
+            #     )
+            #     for i in range(size)
+            # ]
             print("Initializing a random flock. Size: {}\n".format(size))
             for individual in self.individuals:
                 print(individual.get_id(),individual.get_location())

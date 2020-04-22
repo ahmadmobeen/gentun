@@ -11,8 +11,10 @@ from keras.optimizers import Adam
 from keras.models import Model
 from sklearn.model_selection import StratifiedKFold
 from keras import metrics
-from keras.utils import multi_gpu_model
-
+# from keras.utils import multi_gpu_model
+import os
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 from .generic_models import GentunModel
 
 K.set_image_data_format('channels_last')
