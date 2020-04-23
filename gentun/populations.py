@@ -77,11 +77,13 @@ class  Flock(object):
     returns the strongest individual.
     """
 
-    def __init__(self, species, x_train, y_train, input_shape, nb_classes,individual_list=None, size=None,
+    def __init__(self, species, x_train, y_train, x_test,y_test,input_shape, nb_classes,individual_list=None, size=None,
                  flight_length=13, awareness_probability=0.15, maximize=True,
                  additional_parameters=None):
         self.x_train = x_train
         self.y_train = y_train
+        self.x_test=x_test
+        self.y_test=y_test
         self.input_shape=input_shape
         self.nb_classes=nb_classes
         self.species = species
@@ -96,7 +98,7 @@ class  Flock(object):
             self.flock_size = size
             print(self.explored)
             for i in range(size):
-                crow=self.species(self.x_train, self.y_train, flight_length,awareness_probability,id=i,input_shape=self.input_shape, classes=self.nb_classes,**additional_parameters)
+                crow=self.species("0",self.x_train, self.y_train, self.x_test,self.y_test,flight_length,awareness_probability,id=i,input_shape=self.input_shape, classes=self.nb_classes,**additional_parameters)
                 while crow.get_location() in self.explored:
                     print (crow.get_location(), "already created")
                     crow.fly_random_location(crow.get_space())

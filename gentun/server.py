@@ -72,7 +72,7 @@ class RpcClient(object):
         )
         while self.response is None:
             time.sleep(3)
-        id, _, fitness,last_location,best_fitness,memory,location,_,exp_no=json.loads(parameters)
+        id, _, fitness,last_location,best_fitness,memory,location,_,exp_no,algo,dataset=json.loads(parameters)
 
         print("\n [*] Evaluating individual {}".format(id), "on ", location, ".")
         print(" [*] Fitness of Crow {}".format(id), "on location", last_location," was {:.8f}".format(fitness), ".")
@@ -179,13 +179,15 @@ class DistributedFlock(Flock):
     the fittest individual.
     """
 
-    def __init__(self, species, x_train=None, y_train=None, input_shape=(28,28,1),nb_classes=10,individual_list=None, size=None,
+    def __init__(self, algo,dataset,species, x_train=None, y_train=None, x_test=None, y_test=None,input_shape=(28,28,1),nb_classes=10,individual_list=None, size=None,
                  flight_length=13,awareness_probability=0.15, maximize=True, additional_parameters=None,
                  host='localhost', port=5672, user='test', password='test', rabbit_queue='rpc_queue',exp_no=0):
         super(DistributedFlock, self).__init__(
-            species, x_train, y_train, input_shape,nb_classes,individual_list, size,
+            species, x_train, y_train, x_test,y_test,input_shape,nb_classes,individual_list, size,
             flight_length,awareness_probability, maximize, additional_parameters
         )
+        self.algo=algo
+        self.dataset=dataset
         self.credentials = {
             'host': host,
             'port': port,
@@ -213,7 +215,7 @@ class DistributedFlock(Flock):
         for i, individual in enumerate(self.individuals):
             # if not individual.get_fitness_status():
             if individual.get_location() not in explored:
-                job_order = json.dumps([i, individual.get_space(), individual.get_fitness(),individual.get_last_location(),individual.get_best_fitness(),individual.get_memory(),individual.get_location(),individual.get_additional_parameters(),self.exp_no])
+                job_order = json.dumps([i, individual.get_space(), individual.get_fitness(),individual.get_last_location(),individual.get_best_fitness(),individual.get_memory(),individual.get_location(),individual.get_additional_parameters(),self.exp_no,self.algo,self.dataset])
                 jobs.put(True)
                 client = RpcClient(jobs, responses, **self.credentials)
                 communication_thread = threading.Thread(target=client.call, args=[job_order])

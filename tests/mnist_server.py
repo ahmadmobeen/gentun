@@ -16,7 +16,7 @@ db_client=pymongo.MongoClient("223.195.37.85",27017)
 db=db_client["binaryCSA"]
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 parser = argparse.ArgumentParser("Neural Architecture Search Server")
-parser.add_argument('-d', '--dataset', type=str, default="cifar10", help="Name of dataset (cifar10/mnist)")
+parser.add_argument('-d', '--dataset', type=str, default="mnist", help="Name of dataset (cifar10/mnist)")
 parser.add_argument('-a', '--algorithm', type=str, default="csa", help="Name of algorithm (csa/ga)")
 args = parser.parse_args()
 
@@ -89,16 +89,16 @@ if __name__ == '__main__':
         awareness_probability = 0.15
         tournament_size = 5
 
-        nodes = (3, 5)#4, 5)
-        kernels_per_layer = (20,50)#(64, 128)#, 256)
-        kernel_sizes = ((5, 5), (5, 5))#, (3, 3))
-        dense_units = 500#1024
+        nodes = (3, 4, 5)
+        kernels_per_layer = (64, 128, 256)
+        kernel_sizes = ((5, 5), (5,5), (5,5))
+        dense_units = 1024
 
 
-        kfold = 5
+        kfold = 3
         batch_size = 32
-        epochs = (20,4,1)#(120, 60, 40, 20)
-        learning_rates = (1e-3, 1e-4, 1e-5)
+        epochs = (120, 60, 40, 20)
+        learning_rates = (1e-2, 1e-3, 1e-4, 1e-5)
         dropout_probability = 0.5
         maximize = True
 
@@ -131,7 +131,7 @@ if __name__ == '__main__':
         exp_col.insert_one(experiment_doc)
         print("Running Experiment Number",experiment_no,"at",datetime.fromtimestamp(start_time))
 
-        flock = DistributedFlock(
+        flock = DistributedFlock(args.algorithm,args.dataset,
             CrowIndividual, input_shape=input_shape,nb_classes=nb_classes,size=flock_size, flight_length=flight_length, awareness_probability=awareness_probability, individual_list=individuals_list,
             additional_parameters={
                 'kfold': kfold, 'epochs': epochs, 'learning_rate': learning_rates, 'batch_size': batch_size,
@@ -143,7 +143,8 @@ if __name__ == '__main__':
         csa = CrowSearchAlgorithm(flock,tournament_size)
         csa.run(iterations,experiment_no)
         running_time=time.time()-start_time
-        exp_col.update_one({"no":experiment_no},{"$set":{"exec_time":timedelta(seconds=running_time)}})
+        print(timedelta(seconds=running_time))
+        exp_col.update_one({"no":experiment_no},{"$set":{"exec_time":str(timedelta(seconds=running_time))}})
         print("Total Running Time is",running_time)
     else:
         raise Exception("Only GA and CSA are supported")

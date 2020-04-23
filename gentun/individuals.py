@@ -290,11 +290,11 @@ class CrowIndividual(object):
     genome and a random individual generator.
     """
 
-    def __init__(self, x_train, y_train, flight_length=13,awareness_probability=0.15,space=None, location=None, fitness=0,memory=None,best_fitness=0,last_location=None,id=None, nodes=(3,4,5),
+    def __init__(self,gpu, x_train, y_train, x_test,y_test, flight_length=13,awareness_probability=0.15,space=None, location=None, fitness=0,memory=None,best_fitness=0,last_location=None,id=None, nodes=(3,4,5),
                  input_shape=(28, 28, 1), kernels_per_layer=(64,128,256), kernel_sizes=((3,3), (3,3), (3,3)), dense_units=1024,
                  dropout_probability=0.5, classes=10, kfold=5, epochs=(3,), learning_rate=(1e-3,), batch_size=32):
 
-
+        self.gpu=gpu
         if space is None:
             space = {'S_{}'.format(i + 1): int(K_s * (K_s - 1) / 2) for i, K_s in enumerate(nodes)}
         if location is None:
@@ -311,6 +311,8 @@ class CrowIndividual(object):
         # Set individual's attributes
         self.x_train = x_train
         self.y_train = y_train
+        self.x_test = x_test
+        self.y_test = y_test
         self.space = space
         self.validate_space()
         self.location = location
@@ -401,12 +403,12 @@ class CrowIndividual(object):
         print(" [*] Best known performance of Crow {}".format(self.id)," is","{:.8f}".format(self.get_best_fitness()),"on location",self.get_memory())
 
         #Todo: Print story line of memory update. Remove unnecessary prints on server side responce.
-        model = GeneticCnnModel(
-            self.x_train, self.y_train, self.location, self.nodes, self.input_shape, self.kernels_per_layer,
+        model = GeneticCnnModel(self.gpu,
+            self.x_train, self.y_train, self.x_test,self.y_test,self.location, self.nodes, self.input_shape, self.kernels_per_layer,
             self.kernel_sizes, self.dense_units, self.dropout_probability, self.classes,
             self.kfold, self.epochs, self.learning_rate, self.batch_size
         )
-        self.loss,self.accuracy,self.mae,self.mse,self.msle= model.cross_validate()
+        self.loss,self.accuracy,self.mae,self.mse,self.msle= model.validate()#cross_validate()
         self.fitness = self.accuracy
         print(" [*] Performance of Crow {}".format(self.id)," is", "{:.8f}".format(self.get_fitness()), "on location", self.get_location())
         if self.best_fitness==None or self.best_fitness < self.fitness:
@@ -586,7 +588,7 @@ class CrowIndividual(object):
     def copy(self):
         """Copy instance."""
         individual_copy = self.__class__(
-            self.x_train, self.y_train, self.flight_length,self.awareness_probability, self.space.copy(),self.location.copy(), self.memory.copy(), **self.get_additional_parameters()
+            self.x_train, self.y_train, self.x_test,self.y_test, self.flight_length,self.awareness_probability, self.space.copy(),self.location.copy(), self.memory.copy(), **self.get_additional_parameters()
         )
         individual_copy.set_fitness(self.fitness)
         return individual_copy

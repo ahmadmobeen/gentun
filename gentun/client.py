@@ -8,16 +8,14 @@ import json
 import pika
 import threading
 import time
-
-
+from sklearn.preprocessing import LabelBinarizer
+from .individuals import GeneticCnnIndividual, CrowIndividual
+import numpy as np
 class GentunClient(object):
 
-    def __init__(self, individual, algorithm,x_train, y_train, host='localhost', port=5672,
+    def __init__(self, gpu="0", host='localhost', port=5672,
                  user='guest', password='guest', rabbit_queue='rpc_queue'):
-        self.individual = individual
-        self.algorithm=algorithm
-        self.x_train = x_train
-        self.y_train = y_train
+        self.gpu=gpu
         self.credentials = pika.PlainCredentials(user, password)
         self.parameters = pika.ConnectionParameters(host, port, '/', self.credentials)
         self.connection = pika.BlockingConnection(self.parameters)
@@ -39,23 +37,63 @@ class GentunClient(object):
                 pass
 
     def on_request(self, channel, method, properties, body):
-        i, genes, fitness,last_location,best_fitness,memory,new_location,additional_parameters,exp_no = json.loads(body)
+        i, genes, fitness,last_location,best_fitness,memory,new_location,additional_parameters,exp_no,algo,dataset = json.loads(body)
         print(additional_parameters)
         # If an additional parameter is received as a list, convert to tuple
         for param in additional_parameters.keys():
             if isinstance(additional_parameters[param], list):
                 additional_parameters[param] = tuple(additional_parameters[param])
+
+        self.algorithm = algo
+        self.dataset=dataset
+
+        if self.dataset == "mnist":
+            from keras.datasets import mnist
+            (train_images, train_labels), (test_images, test_labels) = mnist.load_data()
+
+        elif self.dataset == "cifar10":
+            from keras.datasets import cifar10
+            (train_images, train_labels), (test_images, test_labels) = cifar10.load_data()
+
+        else:
+            raise Exception("Currently only mnist and cifar10 datasets are supported")
+
+        n = train_images.shape[0]
+        self.input_shape = train_images[0].shape
+        lb = LabelBinarizer()
+        lb.fit(range(10))
+        # selection = random.sample(range(n), 10000)  # Use only a subsample
+        self.y_train = lb.transform(train_labels)  # [selection])  # One-hot encodings
+        self.y_test = lb.transform(test_labels)
+
+        if len(train_images.shape) < 4:
+            new_shape = (*train_images.shape, 1)
+            new_shape_test = (*test_images.shape, 1)
+        else:
+            new_shape = train_images.shape
+            new_shape_test = test_images.shape
+
+        x_train = train_images.reshape(new_shape)  # [selection]
+        x_test = test_images.reshape(new_shape_test)
+        self.x_train = x_train / 255  # Normalize train data
+        self.x_test = x_test / 255
+
+        (unique_labels, nb_classes) = np.unique(train_labels, return_counts=True)
+
+
         print(" [.] Evaluating individual {}".format(i))
         # print("     ... Genes: {}".format(str(genes)))
         # print("     ... Other: {}".format(str(additional_parameters)))
         # Run model and return fitness metric
         if self.algorithm=="ga":
+            self.individual = GeneticCnnIndividual
             individual = self.individual(self.x_train, self.y_train, genes=genes, **additional_parameters)
             fitness = individual.get_fitness()
             # Prepare response for master and send it
             response = json.dumps([i, fitness])
         elif self.algorithm=="csa":
-            individual = self.individual(self.x_train, self.y_train, id=i,space=genes, location=new_location,memory=memory,best_fitness=best_fitness,fitness=fitness,last_location=last_location,**additional_parameters)
+            self.individual = CrowIndividual
+            individual = self.individual(self.gpu,self.x_train, self.y_train, self.x_test,self.y_test,id=i,space=genes, location=new_location,memory=memory,best_fitness=best_fitness,fitness=fitness,last_location=last_location,**additional_parameters)
             import time
             start_time=time.time()
             fitness = individual.evaluate_fitness()
@@ -66,6 +104,8 @@ class GentunClient(object):
             last_location=individual.get_last_location()
             # Prepare response for master and send it
             response = json.dumps([i, last_location,fitness,memory,best_fitness,location,training_time,individual.loss,individual.mae,individual.mse,individual.msle])
+        else:
+            raise Exception("Only Genetic Algorithm and Crow Search Algorithm are supported")
 
 
         channel.basic_publish(

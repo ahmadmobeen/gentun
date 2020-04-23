@@ -13,8 +13,7 @@ from sklearn.model_selection import StratifiedKFold
 from keras import metrics
 # from keras.utils import multi_gpu_model
 import os
-os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+
 from .generic_models import GentunModel
 
 K.set_image_data_format('channels_last')
@@ -22,9 +21,12 @@ K.set_image_data_format('channels_last')
 
 class GeneticCnnModel(GentunModel):
 
-    def __init__(self, x_train, y_train, genes, nodes, input_shape, kernels_per_layer, kernel_sizes, dense_units,
+    def __init__(self, gpu,x_train, y_train, x_test,y_test,genes, nodes, input_shape, kernels_per_layer, kernel_sizes, dense_units,
                  dropout_probability, classes, kfold=5, epochs=(3,), learning_rate=(1e-3,), batch_size=32):
-        super(GeneticCnnModel, self).__init__(x_train, y_train)
+        super(GeneticCnnModel, self).__init__(x_train, y_train,x_test,y_test)
+        self.gpu=gpu
+        os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+        os.environ["CUDA_VISIBLE_DEVICES"] = gpu
         self.model = self.build_model(
             genes, nodes, input_shape, kernels_per_layer, kernel_sizes,
             dense_units, dropout_probability, classes
@@ -163,6 +165,34 @@ class GeneticCnnModel(GentunModel):
             mae += results[2] / self.kfold
             mse += results[3] / self.kfold
             msle += results[4] / self.kfold
+        K.clear_session()
+        return loss, acc, mae, mse, msle
+
+    def validate(self):
+        """Train model using k-fold cross validation and
+        return mean value of the validation accuracy.
+        """
+        loss=.0
+        acc = .0
+        mae= .0
+        mse=.0
+        msle=.0
+
+
+        self.reset_weights()
+        for epochs, learning_rate in zip(self.epochs, self.learning_rate):
+            print("Training {} epochs with learning rate {}".format(epochs, learning_rate))
+            self.parallel_model.compile(optimizer=Adam(lr=learning_rate), loss='binary_crossentropy', metrics=['accuracy',metrics.mae,metrics.mse,metrics.msle])
+            self.parallel_model.fit(
+                self.x_train, self.y_train, epochs=epochs, batch_size=self.batch_size, verbose=1
+            )
+        results=self.parallel_model.evaluate(self.x_test, self.y_test, verbose=0)
+        # print(results)
+        loss = results[0]
+        acc = results[1]
+        mae = results[2]
+        mse = results[3]
+        msle = results[4]
         K.clear_session()
         return loss, acc, mae, mse, msle
 
