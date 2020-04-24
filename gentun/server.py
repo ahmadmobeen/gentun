@@ -79,7 +79,7 @@ class RpcClient(object):
         print(" [*] Best known performance of Crow {}".format(id), " is", "{:.8f}".format(best_fitness),"on location", memory)
 
 
-        client_id,client_last_location,client_acc,client_memory,client_best_acc,client_location,client_train_time,loss,mae,mse,msle=json.loads(self.response)
+        client_id,client_last_location,client_acc,client_memory,client_best_acc,client_location,client_train_time,loss,mae,mse,msle,training_history,epochs_history,model_json=json.loads(self.response)
         # assert(id==client_id)
         # assert(location==client_location)
         # assert(last_location==client_last_location)
@@ -100,6 +100,9 @@ class RpcClient(object):
             "mean_absolute_error":mae,
             "mean_squared_erro":mse,
             "mean_squared_log_error":msle,
+            "training_history":training_history,
+            "epochs":epochs_history,
+            "model":model_json,
             "train_time":client_train_time
         }
 
@@ -229,7 +232,7 @@ class DistributedFlock(Flock):
         while not responses.empty():
             response = responses.get(False)
             # id, last_location, acc, memory, best_acc, new_location =
-            client_id, client_last_location, client_acc, client_memory, client_best_acc, client_location,exec_time,loss,mae,mse,msle=json.loads(response)
+            client_id, client_last_location, client_acc, client_memory, client_best_acc, client_location,exec_time,loss,mae,mse,msle,training_history,epochs_history,model_json=json.loads(response)
             individual=self.individuals[client_id]
             assert (individual.get_id() == client_id)
             assert (individual.get_location() == client_location)

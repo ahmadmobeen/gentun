@@ -10,6 +10,7 @@ from keras.layers import Input, Conv2D, Activation, Add, MaxPooling2D, Flatten, 
 from keras.optimizers import Adam
 from keras.models import Model
 from sklearn.model_selection import StratifiedKFold
+from keras.callbacks import EarlyStopping
 from keras import metrics
 # from keras.utils import multi_gpu_model
 import os
@@ -41,9 +42,9 @@ class GeneticCnnModel(GentunModel):
 
         self.name = '-'.join(gene for gene in genes.values())
         self.kfold = kfold
-        if type(epochs) is int and type(learning_rate) is int:
-            self.epochs = (epochs,)
-            self.learning_rate = (learning_rate,)
+        if type(epochs) is int and type(learning_rate) is float:
+            self.epochs = epochs#(epochs,)
+            self.learning_rate = learning_rate#(learning_rate,)
         elif type(epochs) is tuple and type(learning_rate) is tuple:
             self.epochs = epochs
             self.learning_rate = learning_rate
@@ -168,7 +169,7 @@ class GeneticCnnModel(GentunModel):
         K.clear_session()
         return loss, acc, mae, mse, msle
 
-    def validate(self):
+    def old_validate(self):
         """Train model using k-fold cross validation and
         return mean value of the validation accuracy.
         """
@@ -195,5 +196,35 @@ class GeneticCnnModel(GentunModel):
         msle = results[4]
         K.clear_session()
         return loss, acc, mae, mse, msle
+
+    # def lr_decay(self,epoch):
+    #     initial_lrate = 0.1
+    #     k = 0.1
+    #     lrate = initial_lrate * exp(-k * t)
+    #     return lratelrate = LearningRateScheduler(exp_decay)
+
+    def validate(self):
+        """Train model using k-fold cross validation and
+        return mean value of the validation accuracy.
+        """
+        early_stopper= EarlyStopping(monitor='val_acc',patience=30)
+
+        self.reset_weights()
+        print("Training {} epochs with learning rate {}".format(self.epochs, self.learning_rate))
+        self.parallel_model.compile(optimizer=Adam(lr=self.learning_rate), loss='binary_crossentropy', metrics=['accuracy',metrics.mae,metrics.mse,metrics.msle])
+        training_results=self.parallel_model.fit(self.x_train, self.y_train, epochs=self.epochs, batch_size=self.batch_size, verbose=1,callbacks=[early_stopper],validation_split=0.1)
+        # print("Training Results",str(training_results.history))
+        print ("Stopped after {} Epochs".format(len(training_results.epoch)))
+        # print("Model",training_results.model.summary())
+
+        results=self.parallel_model.evaluate(self.x_test, self.y_test, verbose=0)
+        # print(results)
+        loss = results[0]
+        acc = results[1]
+        mae = results[2]
+        mse = results[3]
+        msle = results[4]
+        K.clear_session()
+        return loss, acc, mae, mse, msle,training_results.history,training_results.epoch,training_results.model.to_json()
 
 

@@ -16,7 +16,7 @@ db_client=pymongo.MongoClient("223.195.37.85",27017)
 db=db_client["binaryCSA"]
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 parser = argparse.ArgumentParser("Neural Architecture Search Server")
-parser.add_argument('-d', '--dataset', type=str, default="mnist", help="Name of dataset (cifar10/mnist)")
+parser.add_argument('-d', '--dataset', type=str, default="cifar10", help="Name of dataset (cifar10/mnist)")
 parser.add_argument('-a', '--algorithm', type=str, default="csa", help="Name of algorithm (csa/ga)")
 args = parser.parse_args()
 
@@ -95,10 +95,10 @@ if __name__ == '__main__':
         dense_units = 1024
 
 
-        kfold = 3
+        kfold = 1
         batch_size = 32
-        epochs = (120, 60, 40, 20)
-        learning_rates = (1e-2, 1e-3, 1e-4, 1e-5)
+        epochs = 240#(120, 60, 40, 20)
+        learning_rates = 0.01#(1e-2, 1e-3, 1e-4, 1e-5)
         dropout_probability = 0.5
         maximize = True
 

@@ -408,7 +408,8 @@ class CrowIndividual(object):
             self.kernel_sizes, self.dense_units, self.dropout_probability, self.classes,
             self.kfold, self.epochs, self.learning_rate, self.batch_size
         )
-        self.loss,self.accuracy,self.mae,self.mse,self.msle= model.validate()#cross_validate()
+        self.loss,self.accuracy,self.mae,self.mse,self.msle,self.training_history,self.epochs_history,self.model_json= model.validate()#cross_validate()
+        # print("model",type(self.model),self.model)
         self.fitness = self.accuracy
         print(" [*] Performance of Crow {}".format(self.id)," is", "{:.8f}".format(self.get_fitness()), "on location", self.get_location())
         if self.best_fitness==None or self.best_fitness < self.fitness:
