@@ -15,11 +15,13 @@ class  Population(object):
     returns the strongest individual.
     """
 
-    def __init__(self, species, x_train, y_train, input_shape, nb_classes,individual_list=None, size=None,
+    def __init__(self, species, x_train, y_train, x_test,y_test, input_shape, nb_classes,individual_list=None, size=None,
                  crossover_rate=0.5, mutation_rate=0.015, maximize=True,
                  additional_parameters=None):
         self.x_train = x_train
         self.y_train = y_train
+        self.x_test = x_test
+        self.y_test = y_test
         self.input_shape=input_shape
         self.nb_classes=nb_classes
         self.species = species
@@ -31,17 +33,25 @@ class  Population(object):
                 additional_parameters = {}
             self.population_size = size
             self.individuals = [
-                self.species(
-                    self.x_train, self.y_train, input_shape=self.input_shape, classes=self.nb_classes,crossover_rate=crossover_rate,
+                self.species("0",
+                    self.x_train, self.y_train, self.x_test,self.y_test,id=i,input_shape=self.input_shape, classes=self.nb_classes,crossover_rate=crossover_rate,
                     mutation_rate=mutation_rate, **additional_parameters
                 )
-                for _ in range(size)
+                for i in range(size)
             ]
             print("Initializing a random population. Size: {}".format(size))
         else:
-            assert all([type(individual) is self.species for individual in individual_list])
+            # assert all([type(individual) is self.species for individual in individual_list])
+            self.individuals = [
+                self.species("0",
+                             self.x_train, self.y_train, self.x_test, self.y_test, id=i, input_shape=self.input_shape,
+                             classes=self.nb_classes, crossover_rate=crossover_rate,genes=genes,
+                             mutation_rate=mutation_rate, **additional_parameters
+                             )
+                for i,genes in enumerate(individual_list)
+            ]
             self.population_size = len(individual_list)
-            self.individuals = individual_list
+            # self.individuals = individual_list
 
     def add_individual(self, individual):
         assert type(individual) is self.species
@@ -96,7 +106,6 @@ class  Flock(object):
             if additional_parameters is None:
                 additional_parameters = {}
             self.flock_size = size
-            print(self.explored)
             for i in range(size):
                 crow=self.species("0",self.x_train, self.y_train, self.x_test,self.y_test,flight_length,awareness_probability,id=i,input_shape=self.input_shape, classes=self.nb_classes,**additional_parameters)
                 while crow.get_location() in self.explored:
@@ -105,7 +114,6 @@ class  Flock(object):
 
                 self.explored.append(crow.get_location())
                 self.individuals.append(crow)
-            print(self.explored)
             # self.individuals = [
             #     self.species(
             #         self.x_train, self.y_train, flight_length,awareness_probability,id=i,input_shape=self.input_shape, classes=self.nb_classes,**additional_parameters

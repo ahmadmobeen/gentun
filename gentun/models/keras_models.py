@@ -5,16 +5,17 @@ Machine Learning models compatible with the Genetic Algorithm implemented using 
 
 import keras.backend as K
 import numpy as np
-
 from keras.layers import Input, Conv2D, Activation, Add, MaxPooling2D, Flatten, Dense, Dropout
 from keras.optimizers import Adam
 from keras.models import Model
 from sklearn.model_selection import StratifiedKFold
-from keras.callbacks import EarlyStopping
+from keras.callbacks import EarlyStopping, ReduceLROnPlateau
 from keras import metrics
+from tensorflow.python.client import device_lib
 # from keras.utils import multi_gpu_model
 import os
-
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 from .generic_models import GentunModel
 
 K.set_image_data_format('channels_last')
@@ -26,7 +27,7 @@ class GeneticCnnModel(GentunModel):
                  dropout_probability, classes, kfold=5, epochs=(3,), learning_rate=(1e-3,), batch_size=32):
         super(GeneticCnnModel, self).__init__(x_train, y_train,x_test,y_test)
         self.gpu=gpu
-        os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+
         os.environ["CUDA_VISIBLE_DEVICES"] = gpu
         self.model = self.build_model(
             genes, nodes, input_shape, kernels_per_layer, kernel_sizes,
@@ -52,6 +53,15 @@ class GeneticCnnModel(GentunModel):
             print(epochs, learning_rate)
             raise ValueError("epochs and learning_rate must be both either integers or tuples of integers.")
         self.batch_size = batch_size
+
+        devices = device_lib.list_local_devices()
+        for device in devices:
+            if device.device_type == "GPU":
+                device_attr = device.physical_device_desc.split(",")
+                if gpu in device_attr[0].split(":")[1]:
+                    self.gpu_name = device_attr[1].split(":")[1]
+
+
 
     def plot(self):
         """Draw model to validate gene-to-DAG."""
@@ -208,11 +218,17 @@ class GeneticCnnModel(GentunModel):
         return mean value of the validation accuracy.
         """
         early_stopper= EarlyStopping(monitor='val_acc',patience=30)
+        lr_plateau = ReduceLROnPlateau(monitor='loss', factor=0.3, patience=5, verbose=1, mode='auto',
+                                          min_delta=0.001,
+                                          cooldown=0, min_lr=0.000001)
 
         self.reset_weights()
         print("Training {} epochs with learning rate {}".format(self.epochs, self.learning_rate))
-        self.parallel_model.compile(optimizer=Adam(lr=self.learning_rate), loss='binary_crossentropy', metrics=['accuracy',metrics.mae,metrics.mse,metrics.msle])
-        training_results=self.parallel_model.fit(self.x_train, self.y_train, epochs=self.epochs, batch_size=self.batch_size, verbose=1,callbacks=[early_stopper],validation_split=0.1)
+        self.parallel_model.compile(optimizer=Adam(lr=self.learning_rate, beta_1=0.9, beta_2=0.999, epsilon=1e-07,
+                                                   amsgrad=False), loss='binary_crossentropy',
+                                    metrics=['accuracy',metrics.mae,metrics.mse,metrics.msle])
+        training_results=self.parallel_model.fit(self.x_train, self.y_train, epochs=self.epochs, batch_size=self.batch_size,
+                                                 verbose=1,callbacks=[early_stopper, lr_plateau],validation_split=0.1)
         # print("Training Results",str(training_results.history))
         print ("Stopped after {} Epochs".format(len(training_results.epoch)))
         # print("Model",training_results.model.summary())
@@ -225,6 +241,6 @@ class GeneticCnnModel(GentunModel):
         mse = results[3]
         msle = results[4]
         K.clear_session()
-        return loss, acc, mae, mse, msle,training_results.history,training_results.epoch,training_results.model.to_json()
+        return loss, acc, mae, mse, msle,training_results.history,training_results.epoch,training_results.model.to_json(),self.gpu
 
 

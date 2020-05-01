@@ -79,7 +79,7 @@ class RpcClient(object):
         print(" [*] Best known performance of Crow {}".format(id), " is", "{:.8f}".format(best_fitness),"on location", memory)
 
 
-        client_id,client_last_location,client_acc,client_memory,client_best_acc,client_location,client_train_time,loss,mae,mse,msle,training_history,epochs_history,model_json=json.loads(self.response)
+        client_id,client_last_location,client_acc,client_memory,client_best_acc,client_location,client_train_time,loss,mae,mse,msle,training_history,epochs_history,model_json,system_info=json.loads(self.response)
         # assert(id==client_id)
         # assert(location==client_location)
         # assert(last_location==client_last_location)
@@ -102,13 +102,24 @@ class RpcClient(object):
             "mean_squared_log_error":msle,
             "training_history":training_history,
             "epochs":epochs_history,
-            "model":model_json,
+            "system_info":system_info,
             "train_time":client_train_time
         }
 
-        iteration=len(exp_col.find({"no":exp_no})[0]["iterations"])-1
-        exp_col.update_one({"no":exp_no},{"$push":{"iterations."+str(iteration):crow_doc}})
 
+        iteration=len(exp_col.find_one({"no":exp_no})["iterations"])-1
+        exp_col.update_one({"no":exp_no},{"$push":{"iterations."+str(iteration):crow_doc}})
+        import os
+        models_dir="/home/vip/work/models"
+        exp_dir=os.path.join(models_dir,str(exp_no))
+        iteration_dir=os.path.join(exp_dir,str(iteration))
+        if not os.path.isdir(exp_dir):
+            os.makedirs(exp_dir)
+        if not os.path.isdir(iteration_dir):
+            os.makedirs(iteration_dir)
+
+        file = open(os.path.join(iteration_dir,id+".json"),"w")
+        json.dump(model_json,file)
         # id=int(self.response.decode().split(",")[0].split("[")[1])
         # acc=float(self.response.decode().split(",")[1])
         # best_acc = float(self.response.decode().split(",")[3].split(']')[0])
@@ -131,13 +142,15 @@ class DistributedPopulation(Population):
     the fittest individual.
     """
 
-    def __init__(self, species, x_train=None, y_train=None, input_shape=(28,28,1),nb_classes=10,individual_list=None, size=None,
+    def __init__(self, algo,dataset, species, x_train=None, y_train=None, x_test=None, y_test=None, input_shape=(28,28,1),nb_classes=10,individual_list=None, size=None,
                  crossover_rate=0.5, mutation_rate=0.015, maximize=True, additional_parameters=None,
-                 host='localhost', port=5672, user='test', password='test', rabbit_queue='rpc_queue'):
+                 host='localhost', port=5672, user='test', password='test', rabbit_queue='rpc_queue',exp_no=0):
         super(DistributedPopulation, self).__init__(
-            species, x_train, y_train, input_shape,nb_classes,individual_list, size,
+            species, x_train, y_train, x_test,y_test,input_shape,nb_classes,individual_list, size,
             crossover_rate, mutation_rate, maximize, additional_parameters
         )
+        self.algo = algo
+        self.dataset = dataset
         self.credentials = {
             'host': host,
             'port': port,
@@ -145,6 +158,7 @@ class DistributedPopulation(Population):
             'password': password,
             'rabbit_queue': rabbit_queue
         }
+        self.exp_no = exp_no
 
     def get_fittest(self):
         """Evaluate necessary individuals in parallel before getting fittest."""
@@ -232,7 +246,7 @@ class DistributedFlock(Flock):
         while not responses.empty():
             response = responses.get(False)
             # id, last_location, acc, memory, best_acc, new_location =
-            client_id, client_last_location, client_acc, client_memory, client_best_acc, client_location,exec_time,loss,mae,mse,msle,training_history,epochs_history,model_json=json.loads(response)
+            client_id, client_last_location, client_acc, client_memory, client_best_acc, client_location,exec_time,loss,mae,mse,msle,training_history,epochs_history,model_json,system_info=json.loads(response)
             individual=self.individuals[client_id]
             assert (individual.get_id() == client_id)
             assert (individual.get_location() == client_location)

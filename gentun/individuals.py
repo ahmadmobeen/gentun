@@ -42,7 +42,7 @@ class Individual(object):
     genome and a random individual generator.
     """
 
-    def __init__(self, x_train, y_train, genome, genes, crossover_rate, mutation_rate, additional_parameters=None):
+    def __init__(self, x_train, y_train, x_test, y_test, genome, genes, crossover_rate, mutation_rate, additional_parameters=None):
         self.x_train = x_train
         self.y_train = y_train
         self.genome = genome
@@ -218,7 +218,7 @@ class XgboostIndividual(Individual):
 
 class GeneticCnnIndividual(Individual):
 
-    def __init__(self, x_train, y_train, genome=None, genes=None, crossover_rate=0.3, mutation_rate=0.1, nodes=(3, 5),
+    def __init__(self,gpu, x_train, y_train, x_test,y_test, genome=None, genes=None, crossover_rate=0.3, mutation_rate=0.1, id=None,nodes=(3, 5),
                  input_shape=(28, 28, 1), kernels_per_layer=(20, 50), kernel_sizes=((5, 5), (5, 5)), dense_units=500,
                  dropout_probability=0.5, classes=10, kfold=5, epochs=(3,), learning_rate=(1e-3,), batch_size=32):
         if genome is None:
@@ -226,7 +226,7 @@ class GeneticCnnIndividual(Individual):
         if genes is None:
             genes = self.generate_random_genes(genome)
         # Set individual's attributes
-        super(GeneticCnnIndividual, self).__init__(x_train, y_train, genome, genes, crossover_rate, mutation_rate)
+        super(GeneticCnnIndividual, self).__init__(x_train, y_train, x_test,y_test,genome, genes, crossover_rate, mutation_rate)
         # Set additional parameters which are not tuned
         assert len(nodes) == len(kernels_per_layer) and len(kernels_per_layer) == len(kernel_sizes)
         self.nodes = nodes
@@ -408,7 +408,7 @@ class CrowIndividual(object):
             self.kernel_sizes, self.dense_units, self.dropout_probability, self.classes,
             self.kfold, self.epochs, self.learning_rate, self.batch_size
         )
-        self.loss,self.accuracy,self.mae,self.mse,self.msle,self.training_history,self.epochs_history,self.model_json= model.validate()#cross_validate()
+        self.loss,self.accuracy,self.mae,self.mse,self.msle,self.training_history,self.epochs_history,self.model_json,self.device= model.validate()#cross_validate()
         # print("model",type(self.model),self.model)
         self.fitness = self.accuracy
         print(" [*] Performance of Crow {}".format(self.id)," is", "{:.8f}".format(self.get_fitness()), "on location", self.get_location())

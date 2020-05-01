@@ -12,6 +12,12 @@ from sklearn.preprocessing import LabelBinarizer
 from .individuals import GeneticCnnIndividual, CrowIndividual
 import numpy as np
 import random
+import os
+import platform
+from requests import get
+from netifaces import interfaces, ifaddresses, AF_INET
+
+
 
 class GentunClient(object):
 
@@ -27,6 +33,24 @@ class GentunClient(object):
         heartbeat_thread = threading.Thread(target=self.heartbeat)
         heartbeat_thread.daemon = True
         heartbeat_thread.start()
+
+
+        for ifaceName in interfaces():
+            local_address = [i['addr'] for i in ifaddresses(ifaceName).setdefault(AF_INET, [{'addr': 'No IP addr'}])][0]
+            if "192" in local_address:
+                break
+
+        node = platform.node()
+        system = platform.system()
+        version = platform.version()
+        ip = get('https://api.ipify.org').text
+        file = open(os.path.join(os.path.expanduser("~") , "system.name"))
+        name = file.readline()
+
+
+
+        self.system_info = {"Public IP": ip, "Local IP": local_address, "Alias": name.rstrip(), "Host": node, "OS": system,
+                        "Version": version}
 
     def heartbeat(self):
         """Send heartbeat messages to RabbitMQ server."""
@@ -59,21 +83,15 @@ class GentunClient(object):
 
         else:
             raise Exception("Currently only mnist and cifar10 datasets are supported")
-        print(self.dataset)
         n = train_images.shape[0]
         test_n=test_images.shape[0]
         self.input_shape = train_images[0].shape
         lb = LabelBinarizer()
         lb.fit(range(10))
-        print("Here")
-        selection = random.sample(range(n), 10000)  # Use only a subsample
-        test_selection = random.sample(range(test_n), 1000)
-        print("Here")
-        self.y_train = lb.transform(train_labels[selection])  # One-hot encodings
-        print("Here")
-        test_sel_labels=test_labels[test_selection]
-        self.y_test = lb.transform(test_labels[test_selection])
-        print("Here")
+        # selection = random.sample(range(n), 10000)  # Use only a subsample
+        # test_selection = random.sample(range(test_n), 1000)
+        self.y_train = lb.transform(train_labels)#[selection])  # One-hot encodings
+        self.y_test = lb.transform(test_labels)#[test_selection])
         if len(train_images.shape) < 4:
             new_shape = (*train_images.shape, 1)
             new_shape_test = (*test_images.shape, 1)
@@ -81,8 +99,8 @@ class GentunClient(object):
             new_shape = train_images.shape
             new_shape_test = test_images.shape
 
-        x_train = train_images.reshape(new_shape)[selection]
-        x_test = test_images.reshape(new_shape_test)[test_selection]
+        x_train = train_images.reshape(new_shape)#[selection]
+        x_test = test_images.reshape(new_shape_test)#[test_selection]
         self.x_train = x_train / 255  # Normalize train data
         self.x_test = x_test / 255
 
@@ -112,10 +130,11 @@ class GentunClient(object):
             memory = individual.get_memory()
             location = individual.get_location()
             last_location = individual.get_last_location()
+            self.system_info["device"]=individual.device
             # Prepare response for master and send it
             response = json.dumps(
                 [i, last_location, fitness, memory, best_fitness, location, training_time, individual.loss,
-                 individual.mae, individual.mse, individual.msle,individual.training_history,individual.epochs_history,individual.model_json])
+                 individual.mae, individual.mse, individual.msle,individual.training_history,individual.epochs_history,individual.model_json,self.system_info])
         else:
             raise Exception("Only Genetic Algorithm and Crow Search Algorithm are supported")
 
@@ -134,6 +153,7 @@ class GentunClient(object):
             print(" [-] Press Ctrl+C to interrupt")
             while True:
                 try:
+                    print("Ready")
                     self.channel.start_consuming()
                 except:
                     pass

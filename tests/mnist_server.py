@@ -53,7 +53,12 @@ def load_individuals(file,fromdb=True):
 
 if __name__ == '__main__':
     from gentun import RussianRouletteGA, DistributedPopulation, GeneticCnnIndividual, DistributedFlock,CrowIndividual,CrowSearchAlgorithm
-    #Todo: Timestamp
+
+    host = 'localhost'
+    port = 5672
+    user = 'test'
+    password = 'test'
+
     if args.dataset=="mnist":
         input_shape = (28,28,1)
         nb_classes = 10
@@ -65,74 +70,86 @@ if __name__ == '__main__':
     else:
         raise Exception("Only cifar10 and mnist is supported")
 
+    individuals_list = None
+    seed_file = None
+    # seed_file="../200407_csa_20i_20c_fl13_ap15.txt"
+    # individuals_list=load_individuals(3,fromdb=True)
+
+    iterations = 50
+    population = 20
+
+    tournament_size = 5
+
+    nodes = (3, 4)#, 5)
+    kernels_per_layer = (20,50)#(64, 128, 256)
+    kernel_sizes = ((5, 5), (5, 5))#, (5, 5))
+    dense_units = 1024
+
+    kfold = 1
+    batch_size = 1024
+    epochs = 1#240  # (120, 60, 40, 20)
+    learning_rates = 0.01  # (1e-2, 1e-3, 1e-4, 1e-5)
+    dropout_probability = 0.5
+    maximize = True
+
+    start_time = time.time()
+    exp_col = db["experiments"]
+    experiment_no = exp_col.estimated_document_count() + 1
+    experiment_doc = {
+        "no": experiment_no,
+        "algo": args.algorithm,
+        "start": start_time,
+        "seed_file": seed_file,
+        "population":population,
+        "tournament_size": tournament_size,
+        "maximize": maximize,
+        'kfold': kfold, 'epochs': epochs, 'learning_rate': learning_rates, 'batch_size': batch_size,
+        "nodes": nodes, "kernels_per_layer": kernels_per_layer, "kernel_sizes": kernel_sizes,
+        "dense_units": dense_units,
+        "dropout_probability": dropout_probability,
+        "iterations": []
+    }
+
+
     if args.algorithm=="ga":
+        crossover_rate=0.3
+        mutation_rate=0.1
+        crossover_probability=0.2
+        mutation_probability=0.8
 
-        pop = DistributedPopulation(
-            GeneticCnnIndividual, input_shape=input_shape,nb_classes=nb_classes,size=5, crossover_rate=0.3, mutation_rate=0.1,
-            additional_parameters={
-                'kfold': 5, 'epochs': (20, 4, 1), 'learning_rate': (1e-3, 1e-4, 1e-5), 'batch_size': 32
-            }, maximize=True, host='localhost', user='test', password='test'
-        )
-        ga = RussianRouletteGA(pop, crossover_probability=0.2, mutation_probability=0.8)
-        ga.run(50)
-
-    elif args.algorithm=="csa":
-
-        individuals_list=None
-        seed_file=None
-        # seed_file="../200407_csa_20i_20c_fl13_ap15.txt"
-        # individuals_list=load_individuals(3,fromdb=True)
-
-        iterations = 50
-        flock_size = 20
-        flight_length = 13
-        awareness_probability = 0.15
-        tournament_size = 5
-
-        nodes = (3, 4, 5)
-        kernels_per_layer = (64, 128, 256)
-        kernel_sizes = ((5, 5), (5,5), (5,5))
-        dense_units = 1024
-
-
-        kfold = 1
-        batch_size = 32
-        epochs = 240#(120, 60, 40, 20)
-        learning_rates = 0.01#(1e-2, 1e-3, 1e-4, 1e-5)
-        dropout_probability = 0.5
-        maximize = True
-
-
-        host = 'localhost'
-        port = 5672
-        user = 'test'
-        password = 'test'
-
-        start_time=time.time()
-        exp_col=db["experiments"]
-        experiment_no=exp_col.estimated_document_count()+1
-        experiment_doc={
-            "no": experiment_no,
-            "algo":args.algorithm,
-            "start": start_time,
-            "seed_file" : seed_file,
-            "flock_size" : flock_size,
-            "flight_length" : flight_length,
-            "awareness_probability" : awareness_probability,
-            "tournament_size" : tournament_size,
-            "maximize" : maximize,
-            'kfold': kfold, 'epochs': epochs, 'learning_rate': learning_rates, 'batch_size': batch_size,
-            "nodes": nodes, "kernels_per_layer": kernels_per_layer, "kernel_sizes": kernel_sizes,
-            "dense_units": dense_units,
-            "dropout_probability": dropout_probability,
-            "iterations":[]
+        algorithm_parameters = {
+            "population": population,
+            "crossover_rate": crossover_rate,
+            "mutation_rate": mutation_rate,
+            "crossover_probability":crossover_probability,
+            "mutation_probability":mutation_probability
         }
 
-        exp_col.insert_one(experiment_doc)
-        print("Running Experiment Number",experiment_no,"at",datetime.fromtimestamp(start_time))
+        experiment_doc["algo_parameters"]=algorithm_parameters
+
+        pop = DistributedPopulation(args.algorithm,args.dataset,
+            GeneticCnnIndividual, input_shape=input_shape,nb_classes=nb_classes,size=population, crossover_rate=crossover_rate, mutation_rate=mutation_rate, individual_list=individuals_list,
+            additional_parameters={
+                'kfold': kfold, 'epochs': epochs, 'learning_rate': learning_rates, 'batch_size': batch_size,
+                "nodes": nodes, "kernels_per_layer": kernels_per_layer, "kernel_sizes": kernel_sizes, "dense_units": dense_units,
+                "dropout_probability": dropout_probability
+            }, maximize=maximize, host=host, user=user, password=password,exp_no=experiment_no
+        )
+        searcher = RussianRouletteGA(pop, crossover_probability=crossover_probability, mutation_probability=mutation_probability)
+
+    elif args.algorithm=="csa":
+        flight_length = 13
+        awareness_probability = 0.15
+
+        algorithm_parameters={
+            "flight_length": flight_length,
+            "awareness_probability": awareness_probability
+        }
+
+        experiment_doc["algo_parameters"] = algorithm_parameters
 
         flock = DistributedFlock(args.algorithm,args.dataset,
-            CrowIndividual, input_shape=input_shape,nb_classes=nb_classes,size=flock_size, flight_length=flight_length, awareness_probability=awareness_probability, individual_list=individuals_list,
+            CrowIndividual, input_shape=input_shape,nb_classes=nb_classes,size=population, flight_length=flight_length, awareness_probability=awareness_probability, individual_list=individuals_list,
             additional_parameters={
                 'kfold': kfold, 'epochs': epochs, 'learning_rate': learning_rates, 'batch_size': batch_size,
                 "nodes": nodes, "kernels_per_layer": kernels_per_layer, "kernel_sizes": kernel_sizes, "dense_units": dense_units,
@@ -140,11 +157,15 @@ if __name__ == '__main__':
             }, maximize=maximize, host=host, port=port, user=user, password=password,exp_no=experiment_no
         )
 
-        csa = CrowSearchAlgorithm(flock,tournament_size)
-        csa.run(iterations,experiment_no)
-        running_time=time.time()-start_time
-        print(timedelta(seconds=running_time))
-        exp_col.update_one({"no":experiment_no},{"$set":{"exec_time":str(timedelta(seconds=running_time))}})
-        print("Total Running Time is",running_time)
+        searcher = CrowSearchAlgorithm(flock,tournament_size)
+
     else:
         raise Exception("Only GA and CSA are supported")
+
+    exp_col.insert_one(experiment_doc)
+    print("Running Experiment Number", experiment_no, "at", datetime.fromtimestamp(start_time))
+    searcher.run(iterations, experiment_no)
+    running_time = time.time() - start_time
+    print(timedelta(seconds=running_time))
+    exp_col.update_one({"no": experiment_no}, {"$set": {"exec_time": str(timedelta(seconds=running_time))}})
+    print("Total Running Time is", running_time)
